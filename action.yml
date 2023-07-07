@@ -1,0 +1,58 @@
+name: "command"
+description: "IssueOps commands in GitHub Actions"
+author: "Grant Birkinbine"
+branding:
+  icon: 'play'
+  color: 'gray-dark'
+inputs:
+  github_token:
+    description: The GitHub token used to create an authenticated client - Provided for you by default!
+    default: ${{ github.token }}
+    required: true
+  command:
+    description: 'The string to look for in comments as an IssueOps trigger/command. Example: ".lint"'
+    required: true
+  reaction:
+    description: 'If set, the specified emoji "reaction" is put on the comment to indicate that the trigger was detected. For example, "rocket" or "eyes"'
+    required: true
+    default: "eyes"
+  help_trigger:
+    description: 'The string to look for in comments as an IssueOps help trigger. Example: ".help"'
+    required: true
+    default: ".help"
+  permissions:
+    description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
+    required: true
+    default: "write,maintain,admin"
+  param_separator:
+    description: 'The separator to use for parsing parameters in comments in IssueOps commands. Parameters will are saved as outputs and can be used in subsequent steps'
+    required: true
+    default: "|"
+  allowlist:
+    description: 'A comma separated list of GitHub usernames or teams that should be allowed to use the IssueOps commands configured in this Action. If unset, then all users meeting the "permissions" requirement will be able to run commands. Example: "monalisa,octocat,my-org/my-team"'
+    required: false
+    default: "false"
+  allowlist_pat:
+    description: 'A GitHub personal access token with "read:org" scopes. This is only needed if you are using the "allowlist" option with a GitHub org team. For example: "my-org/my-team"'
+    required: false
+    default: "false"
+outputs:
+  triggered:
+    description: 'The string "true" if the trigger was found, otherwise the string "false" - Just because the workflow was triggered does not mean it should continue. This is a step 1/2 check'
+  continue:
+    description: 'The string "true" if the workflow should continue, otherwise empty - Use this to conditionally control if your workflow should proceed or not. This is a step 2/2 check'
+  comment_body:
+    description: The comment body
+  actor:
+    description: The GitHub handle of the actor that invoked the IssueOps command
+  params:
+    description: The raw parameters that were passed into the IssueOps command
+  comment_id:
+    description: The comment id which triggered this action
+  initial_reaction_id:
+    description: The reaction id for the initial reaction on the trigger comment
+  actor_handle:
+    description: The handle of the user who triggered the action
+runs:
+  using: "node16"
+  main: "dist/index.js"
