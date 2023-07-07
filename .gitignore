@@ -1,0 +1,21 @@
+# vscode
+.vscode
+
+# Dependency directory
+node_modules/
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Extra
+tmp/
