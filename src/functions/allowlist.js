@@ -7,19 +7,19 @@ import githubUsernameRegex from 'github-username-regex'
 // :param orgTeams: An array of org/team names
 // :returns: True if the user is in the org team, false otherwise
 async function orgTeamCheck(actor, orgTeams) {
-  // This pat needs org read permissions if you are using org/teams to define admins
-  const adminsPat = core.getInput('admins_pat')
+  // This pat needs org read permissions if you are using org/teams to define allowlist'd users
+  const allowlistPat = core.getInput('allowlist_pat')
 
-  // If no admin_pat is provided, then we cannot check for org team memberships
-  if (!adminsPat || adminsPat.length === 0 || adminsPat === 'false') {
+  // If no allowlist_pat is provided, then we cannot check for org team memberships
+  if (!allowlistPat || allowlistPat.length === 0 || allowlistPat === 'false') {
     core.warning(
-      'No admins_pat provided, skipping admin check for org team membership'
+      'no allowlist_pat provided, skipping allowlist check for org team membership'
     )
     return false
   }
 
-  // Create a new octokit client with the admins_pat
-  const octokit = github.getOctokit(adminsPat)
+  // Create a new octokit client with the allowlist_pat
+  const octokit = github.getOctokit(allowlistPat)
 
   // Loop through all org/team names
   for (const orgTeam of orgTeams) {
@@ -68,45 +68,45 @@ async function orgTeamCheck(actor, orgTeams) {
   return false
 }
 
-// Helper function to check if a user is set as an admin for branch-deployments
+// Helper function to check if a user is allowed to run the IssueOps command
 // :param context: The GitHub Actions event context
-// :returns: true if the user is an admin, false otherwise (Boolean)
-export async function isAdmin(context) {
-  // Get the admins string from the action inputs
-  const admins = core.getInput('admins')
+// :returns: true if the user is allowed, false otherwise (Boolean)
+export async function isAllowed(context) {
+  // Get the allowlist string from the action inputs
+  const allowlist = core.getInput('allowlist')
 
-  core.debug(`raw admins value: ${admins}`)
+  core.debug(`raw allowlist value: ${allowlist}`)
 
   // Sanitized the input to remove any whitespace and split into an array
-  const adminsSanitized = admins
+  const allowlistSanitized = allowlist
     .split(',')
-    .map(admin => admin.trim().toLowerCase())
+    .map(operator => operator.trim().toLowerCase())
 
-  // loop through admins
+  // loop through the allowlist
   var handles = []
   var orgTeams = []
-  adminsSanitized.forEach(admin => {
+  allowlistSanitized.forEach(operator => {
     // If the item contains a '/', then it is a org/team
-    if (admin.includes('/')) {
-      orgTeams.push(admin)
+    if (operator.includes('/')) {
+      orgTeams.push(operator)
     }
     // Otherwise, it is a github handle
     else {
       // Check if the github handle is valid
-      if (githubUsernameRegex.test(admin)) {
+      if (githubUsernameRegex.test(operator)) {
         // Add the handle to the list of handles and remove @ from the start of the handle
-        handles.push(admin.replace('@', ''))
+        handles.push(operator.replace('@', ''))
       } else {
         core.debug(
-          `${admin} is not a valid GitHub username... skipping admin check`
+          `${operator} is not a valid GitHub username... skipping allowlist check`
         )
       }
     }
   })
 
-  // Check if the user is in the admin handle list
+  // Check if the user is in the operator handle list
   if (handles.includes(context.actor.toLowerCase())) {
-    core.debug(`${context.actor} is an admin via handle reference`)
+    core.debug(`${context.actor} is an allowlisted operator via handle reference`)
     return true
   }
 
@@ -114,12 +114,12 @@ export async function isAdmin(context) {
   if (orgTeams.length > 0) {
     const result = await orgTeamCheck(context.actor, orgTeams)
     if (result) {
-      core.debug(`${context.actor} is an admin via org team reference`)
+      core.debug(`${context.actor} is an allowlisted operator via org team reference`)
       return true
     }
   }
 
-  // If we get here, the user is not an admin
-  core.debug(`${context.actor} is not an admin`)
+  // If we get here, the user is not an operator
+  core.debug(`${context.actor} is not an allowed operator for this command`)
   return false
 }
