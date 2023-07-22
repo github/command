@@ -1,25 +1,21 @@
 import * as core from '@actions/core'
 import {contextCheck} from './context-check'
-import {postDeploy} from './post-deploy'
 import * as github from '@actions/github'
 import {context} from '@actions/github'
 
+// Default failure reaction
+const thumbsDown = '-1'
+// Default success reaction
+const thumbsUp = '+1'
+
 export async function post() {
   try {
-    const ref = core.getState('ref')
     const comment_id = core.getState('comment_id')
     const reaction_id = core.getState('reaction_id')
-    const noop = core.getState('noop')
-    const deployment_id = core.getState('deployment_id')
-    const environment = core.getState('environment')
-    var environment_url = core.getState('environment_url')
     const token = core.getState('actionsToken')
     const bypass = core.getState('bypass')
     const status = core.getInput('status')
     const skip_completing = core.getInput('skip_completing')
-    const environment_url_in_comment =
-      core.getInput('environment_url_in_comment') === 'true'
-    const deployMessage = process.env.DEPLOY_MESSAGE
 
     // If bypass is set, exit the workflow
     if (bypass === 'true') {
@@ -38,34 +34,46 @@ export async function post() {
       return
     }
 
+    // Check the inputs to ensure they are valid
+    if (!comment_id || comment_id.length === 0) {
+      throw new Error('no comment_id provided')
+    } else if (!status || status.length === 0) {
+      throw new Error('no status provided')
+    }
+
     // Create an octokit client
     const octokit = github.getOctokit(token)
 
-    // Set the environment_url
-    if (
-      !environment_url ||
-      environment_url.length === 0 ||
-      environment_url === 'null' ||
-      environment_url.trim() === ''
-    ) {
-      core.debug('environment_url not set, setting to null')
-      environment_url = null
+    // Check the deployment status
+    var success
+    if (status === 'success') {
+      success = true
+    } else {
+      success = false
     }
 
-    await postDeploy(
-      context,
-      octokit,
-      comment_id,
-      reaction_id,
-      status,
-      deployMessage,
-      ref,
-      noop,
-      deployment_id,
-      environment,
-      environment_url,
-      environment_url_in_comment
-    )
+    // Select the reaction to add to the issue_comment
+    var reaction
+    if (success) {
+      reaction = thumbsUp
+    } else {
+      reaction = thumbsDown
+    }
+
+    // Update the action status to indicate the result of the deployment as a comment
+    // add a reaction to the issue_comment to indicate success or failure
+    await octokit.rest.reactions.createForIssueComment({
+      ...context.repo,
+      comment_id: context.payload.comment.id,
+      content: reaction
+    })
+
+    // remove the initial reaction on the IssueOp comment that triggered this action
+    await octokit.rest.reactions.deleteForIssueComment({
+      ...context.repo,
+      comment_id: context.payload.comment.id,
+      reaction_id: parseInt(reaction_id)
+    })
 
     return
   } catch (error) {
