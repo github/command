@@ -4,10 +4,7 @@ import * as core from '@actions/core'
 // :param body: The body of the comment
 // :param param_separator: The separator used to seperate the command from the parameters
 // :returns: the parameters used in the command (String) or null if none are used
-export async function parameters(
-  body,
-  param_separator = '|'
-) {
+export async function parameters(body, param_separator = '|') {
   // Seperate the issueops command on the 'param_separator'
   var paramCheck = body.split(param_separator)
   paramCheck.shift() // remove everything before the 'param_separator'
