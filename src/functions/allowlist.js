@@ -106,7 +106,9 @@ export async function isAllowed(context) {
 
   // Check if the user is in the operator handle list
   if (handles.includes(context.actor.toLowerCase())) {
-    core.debug(`${context.actor} is an allowlisted operator via handle reference`)
+    core.debug(
+      `${context.actor} is an allowlisted operator via handle reference`
+    )
     return true
   }
 
@@ -114,7 +116,9 @@ export async function isAllowed(context) {
   if (orgTeams.length > 0) {
     const result = await orgTeamCheck(context.actor, orgTeams)
     if (result) {
-      core.debug(`${context.actor} is an allowlisted operator via org team reference`)
+      core.debug(
+        `${context.actor} is an allowlisted operator via org team reference`
+      )
       return true
     }
   }

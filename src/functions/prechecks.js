@@ -43,7 +43,7 @@ export async function prechecks(
   var sha = pr.data.head.sha
   var ref = pr.data.head.ref
 
-  var forkBypass = false  
+  var forkBypass = false
 
   // Determine whether to use the ref or sha depending on if the PR is from a fork or not
   // Note: We should not export fork values if the stable_branch is being used here
@@ -203,7 +203,6 @@ export async function prechecks(
       reviewDecision === null ||
       reviewDecision === 'skip_reviews')
   ) {
-
     // Execute the logic below only if update_branch is set to "force"
     core.info(`ci and review checks are passing - OK`)
 
@@ -263,8 +262,7 @@ export async function prechecks(
 
     // If CI checks are set to be bypassed and PR reviews are also set to by bypassed
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'skip_reviews') {
-    message =
-      '✔️ CI and PR reviewers are not required for this operation - OK'
+    message = '✔️ CI and PR reviewers are not required for this operation - OK'
     core.info(message)
 
     // If CI is passing but the PR has not been reviewed
@@ -302,17 +300,10 @@ export async function prechecks(
     return {message: message, status: false}
 
     // If CI is pending and reviewers have not been defined
-  } else if (
-    reviewDecision === null &&
-    commitStatus === 'PENDING'
-  ) {
+  } else if (reviewDecision === null && commitStatus === 'PENDING') {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks must be passing in order to continue`
     return {message: message, status: false}
-
-  } else if (
-    reviewDecision === 'REVIEW_REQUIRED' &&
-    commitStatus === null 
-  ) {
+  } else if (reviewDecision === 'REVIEW_REQUIRED' && commitStatus === null) {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\``
 
     // If CI checks are pending and the PR has not been reviewed

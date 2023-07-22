@@ -44,9 +44,7 @@ export async function run() {
     // Check if the comment is a trigger and what type of trigger it is
     const isDeploy = await triggerCheck(body, trigger)
 
-    if (
-      !isDeploy
-    ) {
+    if (!isDeploy) {
       // If the comment does not activate any triggers, exit
       core.saveState('bypass', 'true')
       core.setOutput('triggered', 'false')
@@ -64,7 +62,6 @@ export async function run() {
     core.setOutput('initial_reaction_id', reactRes.data.id)
     core.saveState('reaction_id', reactRes.data.id)
     core.setOutput('actor_handle', context.payload.comment.user.login)
-
 
     // Check if the default environment is being overwritten by an explicit environment
     const params = await parameters(
