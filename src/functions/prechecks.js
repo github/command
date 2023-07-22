@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import {validPermissions} from './valid-permissions'
-import {isAdmin} from './admin'
+import {isAllowed} from './allowlist'
 
 // Runs precheck logic before the IssueOps command can proceed
 // :param issue_number: The issue number of the event
@@ -181,15 +181,15 @@ export async function prechecks(
     }
   }
 
-  // Get admin data
-  const userIsAdmin = await isAdmin(context)
+  // Get allowed operator data
+  const userIsOperator = await isAllowed(context)
 
   // log values for debugging
   core.debug('precheck values for debugging:')
   core.debug(`reviewDecision: ${reviewDecision}`)
   core.debug(`mergeStateStatus: ${mergeStateStatus}`)
   core.debug(`commitStatus: ${commitStatus}`)
-  core.debug(`userIsAdmin: ${userIsAdmin}`)
+  core.debug(`userIsOperator: ${userIsOperator}`)
   core.debug(`skipCi: ${skipCi}`)
   core.debug(`skipReviews: ${skipReviews}`)
   core.debug(`allowForks: ${allowForks}`)
@@ -255,8 +255,8 @@ export async function prechecks(
     message = `⚠️ CI checks are not required for this operation but the PR has not been reviewed`
     return {message: message, status: false}
 
-    // If CI checks are set to be bypassed and the operator is an admin
-  } else if (commitStatus === 'skip_ci' && userIsAdmin === true) {
+    // If CI checks are set to be bypassed and the operator is an allowed operator
+  } else if (commitStatus === 'skip_ci' && userIsOperator === true) {
     message =
       '✔️ CI is not required for this operation and approval is bypassed due to admin rights - OK'
     core.info(message)
@@ -275,16 +275,16 @@ export async function prechecks(
     message = '⚠️ CI checks are passing but the PR has not been reviewed'
     return {message: message, status: false}
 
-    // If CI is passing and the operator is an admin
-  } else if (commitStatus === 'SUCCESS' && userIsAdmin === true) {
+    // If CI is passing and the operator is an allowed operator
+  } else if (commitStatus === 'SUCCESS' && userIsOperator === true) {
     message =
-      '✔️ CI is passing and approval is bypassed due to admin rights - OK'
+      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK'
     core.info(message)
 
-    // If CI is undefined and the operator is an admin
-  } else if (commitStatus === null && userIsAdmin === true) {
+    // If CI is undefined and the operator is an allowed operator
+  } else if (commitStatus === null && userIsOperator === true) {
     message =
-      '✔️ CI checks have not been defined and approval is bypassed due to admin rights - OK'
+      '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK'
     core.info(message)
 
     // If CI has not been defined but the PR has been approved
