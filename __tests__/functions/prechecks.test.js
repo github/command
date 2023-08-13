@@ -93,24 +93,33 @@ beforeEach(() => {
   }
 })
 
+
+// TODO, the prechecks function needs to be refactored to take in the following parameters:
+  // issue_number,
+  // allowForks,
+  // skipCi,
+  // skipReviews,
+  // allowDraftPRs,
+  // context,
+  // octokit
 test('runs prechecks and finds that the IssueOps command is valid for a branch deployment', async () => {
   expect(
     await prechecks(
-      '.deploy',
-      '.deploy',
-      '.noop',
-      'disabled',
-      'main',
-      '123',
-      true,
-      '',
-      '',
-      '',
-      'production',
-      environmentObj,
-      help_trigger,
-      context,
-      octokit
+      '.deploy', // comment
+      '.deploy', // trigger
+      '.noop', // noop_trigger
+      'disabled', // update_branch
+      'main', // stable_branch
+      '123', // issue_number
+      true, // allowForks
+      '', // skipCiInput
+      '', // skipReviewsInput
+      '', // draft_permitted_targets
+      'production', // environment
+      environmentObj, // environmentObj
+      help_trigger, // help_trigger
+      context, // context
+      octokit // octokit
     )
   ).toStrictEqual({
     message: '✔️ PR is approved and all CI checks passed - OK',
