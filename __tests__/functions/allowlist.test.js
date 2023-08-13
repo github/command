@@ -1,4 +1,4 @@
-import {isAdmin} from '../../src/functions/admin'
+import {isAllowed} from '../../src/functions/allowlist'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
 
@@ -23,8 +23,8 @@ var context
 var octokit
 beforeEach(() => {
   jest.clearAllMocks()
-  process.env.INPUT_ADMINS_PAT = 'faketoken'
-  process.env.INPUT_ADMINS =
+  process.env.INPUT_ALLOWLIST_PAT = 'faketoken'
+  process.env.INPUT_ALLOWLIST =
     'MoNaLiSa,@lisamona,octoawesome/octo-awEsome-team,bad$user'
 
   context = {
@@ -54,44 +54,44 @@ beforeEach(() => {
   })
 })
 
-test('runs isAdmin checks and finds a valid admin via handle reference', async () => {
-  expect(await isAdmin(context)).toStrictEqual(true)
+test('runs isAllowed checks and finds a valid admin via handle reference', async () => {
+  expect(await isAllowed(context)).toStrictEqual(true)
   expect(debugMock).toHaveBeenCalledWith(
-    'monalisa is an admin via handle reference'
+    'monalisa is an allowlisted operator via handle reference'
   )
 })
 
-test('runs isAdmin checks and does not find a valid admin', async () => {
-  process.env.INPUT_ADMINS = 'monalisa'
+test('runs isAllowed checks and does not find a valid admin', async () => {
+  process.env.INPUT_ALLOWLIST = 'monalisa'
   const contextNoAdmin = {
     actor: 'eviluser'
   }
-  expect(await isAdmin(contextNoAdmin)).toStrictEqual(false)
-  expect(debugMock).toHaveBeenCalledWith('eviluser is not an admin')
+  expect(await isAllowed(contextNoAdmin)).toStrictEqual(false)
+  expect(debugMock).toHaveBeenCalledWith('eviluser is not an allowed operator for this command')
 })
 
-test('runs isAdmin checks for an org team and fails due to no admins_pat', async () => {
-  process.env.INPUT_ADMINS_PAT = 'false'
-  process.env.INPUT_ADMINS = 'octoawesome/octo-awesome'
-  expect(await isAdmin(context)).toStrictEqual(false)
+test('runs isAllowed checks for an org team and fails due to no admins_pat', async () => {
+  process.env.INPUT_ALLOWLIST_PAT = 'false'
+  process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome'
+  expect(await isAllowed(context)).toStrictEqual(false)
   expect(warningMock).toHaveBeenCalledWith(
-    'No admins_pat provided, skipping admin check for org team membership'
+    'no allowlist_pat provided, skipping allowlist check for org team membership'
   )
 })
 
-test('runs isAdmin checks for an org team and finds a valid user', async () => {
-  process.env.INPUT_ADMINS = 'octoawesome/octo-awesome-team'
-  expect(await isAdmin(context)).toStrictEqual(true)
+test('runs isAllowed checks for an org team and finds a valid user', async () => {
+  process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
+  expect(await isAllowed(context)).toStrictEqual(true)
   expect(debugMock).toHaveBeenCalledWith(
     'monalisa is in octoawesome/octo-awesome-team'
   )
   expect(debugMock).toHaveBeenCalledWith(
-    'monalisa is an admin via org team reference'
+    'monalisa is an allowlisted operator via org team reference'
   )
 })
 
 // This only handles the global failure case of any 404 in the admin.js file
-test('runs isAdmin checks for an org team and does not find the org', async () => {
+test('runs isAllowed checks for an org team and does not find the org', async () => {
   jest.spyOn(github, 'getOctokit').mockImplementation(() => {
     return {
       rest: {
@@ -105,15 +105,15 @@ test('runs isAdmin checks for an org team and does not find the org', async () =
       }
     }
   })
-  process.env.INPUT_ADMINS = 'octoawesome/octo-awesome-team'
-  expect(await isAdmin(context)).toStrictEqual(false)
+  process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
+  expect(await isAllowed(context)).toStrictEqual(false)
   expect(debugMock).toHaveBeenCalledWith(
     'monalisa is not a member of the octoawesome/octo-awesome-team team'
   )
 })
 
 // This only handles the global failure case of any 404 in the admin.js file
-test('runs isAdmin checks for an org team and does not find the team', async () => {
+test('runs isAllowed checks for an org team and does not find the team', async () => {
   jest.spyOn(github, 'getOctokit').mockImplementation(() => {
     return {
       rest: {
@@ -132,15 +132,15 @@ test('runs isAdmin checks for an org team and does not find the team', async () 
       }
     }
   })
-  process.env.INPUT_ADMINS = 'octoawesome/octo-awesome-team'
-  expect(await isAdmin(context)).toStrictEqual(false)
+  process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
+  expect(await isAllowed(context)).toStrictEqual(false)
   expect(debugMock).toHaveBeenCalledWith(
     'monalisa is not a member of the octoawesome/octo-awesome-team team'
   )
 })
 
 // This test correctly tests if a user is a member of a team or not. If they are in a team a 204 is returned. If they are not a 404 is returned like in this test example
-test('runs isAdmin checks for an org team and does not find the user in the team', async () => {
+test('runs isAllowed checks for an org team and does not find the user in the team', async () => {
   jest.spyOn(github, 'getOctokit').mockImplementation(() => {
     return {
       request: jest
@@ -160,14 +160,14 @@ test('runs isAdmin checks for an org team and does not find the user in the team
       }
     }
   })
-  process.env.INPUT_ADMINS = 'octoawesome/octo-awesome-team'
-  expect(await isAdmin(context)).toStrictEqual(false)
+  process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
+  expect(await isAllowed(context)).toStrictEqual(false)
   expect(debugMock).toHaveBeenCalledWith(
     'monalisa is not a member of the octoawesome/octo-awesome-team team'
   )
 })
 
-test('runs isAdmin checks for an org team and an unexpected status code is received from the request method with octokit', async () => {
+test('runs isAllowed checks for an org team and an unexpected status code is received from the request method with octokit', async () => {
   jest.spyOn(github, 'getOctokit').mockImplementation(() => {
     return {
       request: jest.fn().mockReturnValueOnce({
@@ -187,15 +187,15 @@ test('runs isAdmin checks for an org team and an unexpected status code is recei
       }
     }
   })
-  process.env.INPUT_ADMINS = 'octoawesome/octo-awesome-team'
-  expect(await isAdmin(context)).toStrictEqual(false)
-  expect(debugMock).toHaveBeenCalledWith('monalisa is not an admin')
+  process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
+  expect(await isAllowed(context)).toStrictEqual(false)
+  expect(debugMock).toHaveBeenCalledWith('monalisa is not an allowed operator for this command')
   expect(warningMock).toHaveBeenCalledWith(
     'non 204 response from org team check: 500'
   )
 })
 
-test('runs isAdmin checks for an org team and an unexpected error is thrown from any API call', async () => {
+test('runs isAllowed checks for an org team and an unexpected error is thrown from any API call', async () => {
   jest.spyOn(github, 'getOctokit').mockImplementation(() => {
     return {
       request: jest
@@ -215,9 +215,9 @@ test('runs isAdmin checks for an org team and an unexpected error is thrown from
       }
     }
   })
-  process.env.INPUT_ADMINS = 'octoawesome/octo-awesome-team'
-  expect(await isAdmin(context)).toStrictEqual(false)
-  expect(debugMock).toHaveBeenCalledWith('monalisa is not an admin')
+  process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
+  expect(await isAllowed(context)).toStrictEqual(false)
+  expect(debugMock).toHaveBeenCalledWith('monalisa is not an allowed operator for this command')
   expect(warningMock).toHaveBeenCalledWith(
     'Error checking org team membership: Error: something went boom'
   )
