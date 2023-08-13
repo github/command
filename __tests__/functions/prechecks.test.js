@@ -125,23 +125,7 @@ test('runs prechecks and finds that the IssueOps command is valid for a rollback
   environmentObj.stable_branch_used = true
 
   expect(
-    await prechecks(
-      '.deploy main',
-      '.deploy',
-      '.noop',
-      'disabled',
-      'main',
-      '123',
-      true,
-      '',
-      '',
-      '',
-      'production',
-      environmentObj,
-      help_trigger,
-      context,
-      octokit
-    )
+    await prechecks('123', true, '', '', '', context, octokit)
   ).toStrictEqual({
     message: '✔️ Deployment to the **stable** branch requested - OK',
     noopMode: false,
@@ -173,7 +157,6 @@ test('runs prechecks and finds that the IssueOps command is valid for a noop dep
     )
   ).toStrictEqual({
     message: '✔️ PR is approved and all CI checks passed - OK',
-    noopMode: true,
     ref: 'test-ref',
     status: true,
     sha: 'abc123'
@@ -423,7 +406,6 @@ test('runs prechecks and finds CI is passing and the PR has not been reviewed BU
   ).toStrictEqual({
     message: '✔️ All CI checks passed and **noop** requested - OK',
     status: true,
-    noopMode: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
@@ -725,7 +707,6 @@ test('runs prechecks and finds CI checked have not been defined, the PR has not 
   ).toStrictEqual({
     message: '✔️ CI checks have not been defined and **noop** requested - OK',
     status: true,
-    noopMode: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
@@ -1769,7 +1750,6 @@ test('runs prechecks and finds that the IssueOps commands are valid with paramet
     )
   ).toStrictEqual({
     message: '✔️ All CI checks passed and **noop** requested - OK',
-    noopMode: true,
     ref: 'test-ref',
     status: true,
     sha: 'abc123'
@@ -2245,7 +2225,6 @@ test('runs prechecks and finds that skip_ci is set, reviews are required, and it
   ).toStrictEqual({
     message:
       '✔️ CI requirements have been disabled for this environment and **noop** requested - OK',
-    noopMode: true,
     ref: 'test-ref',
     status: true,
     sha: 'abc123'
@@ -2636,7 +2615,6 @@ test('runs prechecks and finds the PR is NOT behind the stable branch (BLOCKED) 
   ).toStrictEqual({
     message: '✔️ PR is approved and all CI checks passed - OK',
     status: true,
-    noopMode: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
@@ -2695,26 +2673,17 @@ test('runs prechecks and finds the PR is NOT behind the stable branch (HAS_HOOKS
 
   expect(
     await prechecks(
-      '.noop',
-      '.deploy',
-      '.noop',
-      'force',
-      'main',
       '123',
       true,
       '',
       '',
       '', // draft_permitted_targets
-      'production',
-      environmentObj,
-      help_trigger,
       context,
       octokit
     )
   ).toStrictEqual({
     message: '✔️ PR is approved and all CI checks passed - OK',
     status: true,
-    noopMode: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
