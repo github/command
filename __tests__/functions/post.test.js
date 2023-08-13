@@ -1,6 +1,5 @@
 import {post} from '../../src/functions/post'
 import * as core from '@actions/core'
-import * as postDeploy from '../../src/functions/post-deploy'
 import * as contextCheck from '../../src/functions/context-check'
 import * as github from '@actions/github'
 
@@ -30,9 +29,6 @@ beforeEach(() => {
   })
   jest.spyOn(core, 'getState').mockImplementation(name => {
     return validStates[name]
-  })
-  jest.spyOn(postDeploy, 'postDeploy').mockImplementation(() => {
-    return undefined
   })
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
     return true

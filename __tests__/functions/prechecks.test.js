@@ -1,5 +1,5 @@
 import {prechecks} from '../../src/functions/prechecks'
-import * as isAdmin from '../../src/functions/admin'
+import * as isAllowed from '../../src/functions/allowlist'
 import * as core from '@actions/core'
 
 // Globals for testing
@@ -1637,7 +1637,7 @@ test('runs prechecks and finds that the IssueOps commands are valid and from a d
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return true
   })
   expect(
@@ -1690,7 +1690,7 @@ test('runs prechecks and finds that the IssueOps commands are valid with paramet
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return true
   })
 
@@ -1746,7 +1746,7 @@ test('runs prechecks and finds that the IssueOps commands are valid with paramet
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return true
   })
 
@@ -1802,7 +1802,7 @@ test('runs prechecks and finds that the IssueOps commands are valid with paramet
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return true
   })
   expect(
@@ -2066,7 +2066,7 @@ test('runs prechecks and finds that the commit status is success and skip_review
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return false
   })
 
@@ -2161,7 +2161,7 @@ test('runs prechecks and finds that skip_ci is set and now reviews are defined',
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return false
   })
 
@@ -2221,7 +2221,7 @@ test('runs prechecks and finds that skip_ci is set, reviews are required, and it
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return false
   })
 
@@ -2282,7 +2282,7 @@ test('runs prechecks and finds that skip_ci is set and skip_reviews is set', asy
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return false
   })
 
@@ -2342,7 +2342,7 @@ test('runs prechecks and finds that skip_ci is set and the deployer is an admin'
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return true
   })
 
@@ -2402,7 +2402,7 @@ test('runs prechecks and finds that CI is pending and reviewers have not been de
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return false
   })
 
@@ -2458,7 +2458,7 @@ test('runs prechecks and finds that the PR is NOT reviewed and CI checks have be
       }
     }
   })
-  jest.spyOn(isAdmin, 'isAdmin').mockImplementation(() => {
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return false
   })
 
