@@ -50,26 +50,6 @@ inputs:
     required:
       type: boolean
       required: true
-  environment:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  environment_targets:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
   draft_permitted_targets:
     description:
       type: string
@@ -80,36 +60,6 @@ inputs:
     default:
       type: string
       required: false
-  environment_urls:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: false
-  environment_url_in_comment:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  production_environment:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
   reaction:
     description:
       type: string
@@ -160,26 +110,6 @@ inputs:
     default:
       type: string
       required: true
-  help_trigger:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  lock_info_alias:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
   permissions:
     description:
       type: string
@@ -199,16 +129,6 @@ inputs:
       required: true
     required:
       type: boolean
-      required: true
-  global_lock_flag:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
       required: true
   stable_branch:
     description:
@@ -300,16 +220,6 @@ inputs:
     default:
       type: string
       required: true
-  unlock_on_merge_mode:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: false
   skip_completing:
     description:
       type: string

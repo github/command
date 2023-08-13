@@ -16,10 +16,6 @@ inputs:
     description: 'If set, the specified emoji "reaction" is put on the comment to indicate that the trigger was detected. For example, "rocket" or "eyes"'
     required: true
     default: "eyes"
-  help_trigger:
-    description: 'The string to look for in comments as an IssueOps help trigger. Example: ".help"'
-    required: true
-    default: ".help"
   permissions:
     description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
     required: true
