@@ -67,7 +67,9 @@ test('runs isAllowed checks and does not find a valid admin', async () => {
     actor: 'eviluser'
   }
   expect(await isAllowed(contextNoAdmin)).toStrictEqual(false)
-  expect(debugMock).toHaveBeenCalledWith('eviluser is not an allowed operator for this command')
+  expect(debugMock).toHaveBeenCalledWith(
+    'eviluser is not an allowed operator for this command'
+  )
 })
 
 test('runs isAllowed checks for an org team and fails due to no admins_pat', async () => {
@@ -189,7 +191,9 @@ test('runs isAllowed checks for an org team and an unexpected status code is rec
   })
   process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
   expect(await isAllowed(context)).toStrictEqual(false)
-  expect(debugMock).toHaveBeenCalledWith('monalisa is not an allowed operator for this command')
+  expect(debugMock).toHaveBeenCalledWith(
+    'monalisa is not an allowed operator for this command'
+  )
   expect(warningMock).toHaveBeenCalledWith(
     'non 204 response from org team check: 500'
   )
@@ -217,7 +221,9 @@ test('runs isAllowed checks for an org team and an unexpected error is thrown fr
   })
   process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome-team'
   expect(await isAllowed(context)).toStrictEqual(false)
-  expect(debugMock).toHaveBeenCalledWith('monalisa is not an allowed operator for this command')
+  expect(debugMock).toHaveBeenCalledWith(
+    'monalisa is not an allowed operator for this command'
+  )
   expect(warningMock).toHaveBeenCalledWith(
     'Error checking org team membership: Error: something went boom'
   )

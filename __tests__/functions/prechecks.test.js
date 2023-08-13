@@ -1,5 +1,6 @@
 import {prechecks} from '../../src/functions/prechecks'
 import * as isAllowed from '../../src/functions/allowlist'
+import * as validPermissions from '../../src/functions/valid-permissions'
 import * as core from '@actions/core'
 
 // Globals for testing
@@ -9,9 +10,6 @@ const warningMock = jest.spyOn(core, 'warning')
 var environmentObj
 var help_trigger
 var context
-var getCollabOK
-var getPullsOK
-var graphQLOK
 var octokit
 
 beforeEach(() => {
@@ -21,6 +19,10 @@ beforeEach(() => {
   jest.spyOn(core, 'warning').mockImplementation(() => {})
   jest.spyOn(core, 'setOutput').mockImplementation(() => {})
   process.env.INPUT_PERMISSIONS = 'admin,write,maintain'
+
+  jest.spyOn(validPermissions, 'validPermissions').mockImplementation(() => {
+    return true
+  })
 
   environmentObj = {
     target: 'production',
@@ -41,89 +43,74 @@ beforeEach(() => {
     }
   }
 
-  getCollabOK = jest
-    .fn()
-    .mockReturnValue({data: {permission: 'write'}, status: 200})
-  getPullsOK = jest.fn().mockReturnValue({
-    data: {
-      head: {
-        ref: 'test-ref',
-        sha: 'abc123'
-      },
-      base: {
-        ref: 'base-ref'
-      }
-    },
-    status: 200
-  })
-
-  graphQLOK = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'APPROVED',
-        mergeStateStatus: 'CLEAN',
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 3
-                },
-                statusCheckRollup: {
-                  state: 'SUCCESS'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
-
   octokit = {
     rest: {
       repos: {
-        getCollaboratorPermissionLevel: getCollabOK
+        getCollaboratorPermissionLevel: jest
+          .fn()
+          .mockReturnValue({data: {permission: 'write'}, status: 200})
       },
       pulls: {
-        get: getPullsOK
+        get: jest.fn().mockReturnValue({
+          data: {
+            head: {
+              ref: 'test-ref',
+              sha: 'abc123'
+            },
+            base: {
+              ref: 'base-ref'
+            }
+          },
+          status: 200
+        })
       }
     },
-    graphql: graphQLOK
+    graphql: jest.fn().mockReturnValue({
+      repository: {
+        pullRequest: {
+          reviewDecision: 'APPROVED',
+          mergeStateStatus: 'CLEAN',
+          commits: {
+            nodes: [
+              {
+                commit: {
+                  checkSuites: {
+                    totalCount: 3
+                  },
+                  statusCheckRollup: {
+                    state: 'SUCCESS'
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    })
   }
 })
 
-
 // TODO, the prechecks function needs to be refactored to take in the following parameters:
-  // issue_number,
-  // allowForks,
-  // skipCi,
-  // skipReviews,
-  // allowDraftPRs,
-  // context,
-  // octokit
+// issue_number,
+// allowForks,
+// skipCi,
+// skipReviews,
+// allowDraftPRs,
+// context,
+// octokit
 test('runs prechecks and finds that the IssueOps command is valid for a branch deployment', async () => {
   expect(
     await prechecks(
-      '.deploy', // comment
-      '.deploy', // trigger
-      '.noop', // noop_trigger
-      'disabled', // update_branch
-      'main', // stable_branch
       '123', // issue_number
       true, // allowForks
-      '', // skipCiInput
-      '', // skipReviewsInput
-      '', // draft_permitted_targets
-      'production', // environment
-      environmentObj, // environmentObj
-      help_trigger, // help_trigger
+      '', // skipCi
+      '', // skipReviews
+      '', // allowDraftPRs
       context, // context
       octokit // octokit
     )
   ).toStrictEqual({
     message: '✔️ PR is approved and all CI checks passed - OK',
-    noopMode: false,
     ref: 'test-ref',
     status: true,
     sha: 'abc123'

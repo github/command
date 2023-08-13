@@ -3,7 +3,7 @@ import {validPermissions} from './valid-permissions'
 import {isAllowed} from './allowlist'
 
 // Runs precheck logic before the IssueOps command can proceed
-// :param issue_number: The issue number of the event
+// :param issue_number: The issue number of the event (String)
 // :param allowForks: Boolean which defines whether the Action can run from forks or not
 // :param skipCi: Boolean which defines whether CI checks should be skipped or not
 // :param skipReviews: Boolean which defines whether PR reviews should be skipped or not
