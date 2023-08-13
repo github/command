@@ -91,13 +91,7 @@ beforeEach(() => {
 })
 
 // TODO, the prechecks function needs to be refactored to take in the following parameters:
-// issue_number,
-// allowForks,
-// skipCi,
-// skipReviews,
-// allowDraftPRs,
-// context,
-// octokit
+// search for additional TODO comments in this file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 test('runs prechecks and finds that the IssueOps command is valid for a branch deployment', async () => {
   expect(
     await prechecks(
@@ -2688,3 +2682,5 @@ test('runs prechecks and finds the PR is NOT behind the stable branch (HAS_HOOKS
     sha: 'abc123'
   })
 })
+
+// TODO ^ this last test is the first that shows up when running 'npm run test'. Use it to figure out why the 'message' variable is undefined in the prechecks function
