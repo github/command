@@ -1,4 +1,7 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
+import {context} from '@actions/github'
+import {octokitRetry} from '@octokit/plugin-retry'
 import {triggerCheck} from './functions/trigger-check'
 import {contextCheck} from './functions/context-check'
 import {reactEmote} from './functions/react-emote'
@@ -6,8 +9,6 @@ import {parameters} from './functions/parameters'
 import {actionStatus} from './functions/action-status'
 import {prechecks} from './functions/prechecks'
 import {post} from './functions/post'
-import * as github from '@actions/github'
-import {context} from '@actions/github'
 
 // :returns: 'success', 'success - noop', 'success - merge deploy mode', 'failure', 'safe-exit', 'success - unlock on merge mode' or raises an error
 export async function run() {
@@ -22,8 +23,10 @@ export async function run() {
     const skipReviews = core.getBooleanInput('skip_reviews')
     const param_separator = core.getInput('param_separator')
 
-    // Create an octokit client
-    const octokit = github.getOctokit(token)
+    // Create an octokit client with the retry plugin
+    const octokit = github.getOctokit(token, {
+      additionalPlugins: [octokitRetry]
+    })
 
     // Set the state so that the post run logic will trigger
     core.saveState('isPost', 'true')
