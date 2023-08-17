@@ -50,6 +50,16 @@ inputs:
     required:
       type: boolean
       required: true
+  command:
+    description:
+      type: string
+      required: true
+    default:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
   allow_drafts:
     description:
       type: string
@@ -61,16 +71,6 @@ inputs:
       type: string
       required: false
   reaction:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  trigger:
     description:
       type: string
       required: true
@@ -99,16 +99,6 @@ inputs:
       required: true
     required:
       type: boolean
-      required: true
-  required_contexts:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
       required: true
   skip_ci:
     description:
@@ -188,10 +178,6 @@ outputs:
       type: string
       required: true
   comment_id:
-    description:
-      type: string
-      required: true
-  type:
     description:
       type: string
       required: true
