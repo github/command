@@ -1,0 +1,214 @@
+# Action base info
+name:
+  type: string
+  required: true
+description:
+  type: string
+  required: true
+author:
+  type: string
+  required: true
+branding:
+  icon:
+    type: string
+    required: true
+  color:
+    type: string
+    required: true
+
+# runs section
+runs:
+  using:
+    type: string
+    required: true
+  main:
+    type: string
+    required: true
+  post:
+    type: string
+    required: true
+
+# inputs section
+inputs:
+  github_token:
+    description:
+      type: string
+      required: true
+    default:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+  status:
+    description:
+      type: string
+      required: true
+    default:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+  command:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+  allow_drafts:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: false
+  reaction:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
+  permissions:
+    description:
+      type: string
+      required: true
+    default:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+  param_separator:
+    description:
+      type: string
+      required: true
+    default:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+  skip_ci:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: false
+  skip_reviews:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: false
+  skip_completing:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: false
+  allow_forks:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
+  allowlist:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
+  allowlist_pat:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
+
+# outputs section
+outputs:
+  triggered:
+    description:
+      type: string
+      required: true
+  comment_body:
+    description:
+      type: string
+      required: true
+  actor:
+    description:
+      type: string
+      required: true
+  params:
+    description:
+      type: string
+      required: true
+  comment_id:
+    description:
+      type: string
+      required: true
+  continue:
+    description:
+      type: string
+      required: true
+  fork:
+    description:
+      type: string
+      required: true
+  fork_ref:
+    description:
+      type: string
+      required: true
+  fork_label:
+    description:
+      type: string
+      required: true
+  fork_checkout:
+    description:
+      type: string
+      required: true
+  fork_full_name:
+    description:
+      type: string
+      required: true
+  initial_reaction_id:
+    description:
+      type: string
+      required: true
+  actor_handle:
+    description:
+      type: string
+      required: true

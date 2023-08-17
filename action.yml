@@ -9,6 +9,10 @@ inputs:
     description: The GitHub token used to create an authenticated client - Provided for you by default!
     default: ${{ github.token }}
     required: true
+  status:
+    description: The status of the GitHub Actions - For use in the post run workflow - Provided for you by default!
+    default: ${{ job.status }}
+    required: true
   command:
     description: 'The string to look for in comments as an IssueOps trigger/command. Example: ".lint"'
     required: true
@@ -16,14 +20,26 @@ inputs:
     description: 'If set, the specified emoji "reaction" is put on the comment to indicate that the trigger was detected. For example, "rocket" or "eyes"'
     required: true
     default: "eyes"
-  help_trigger:
-    description: 'The string to look for in comments as an IssueOps help trigger. Example: ".help"'
-    required: true
-    default: ".help"
   permissions:
     description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
     required: true
     default: "write,maintain,admin"
+  allow_drafts:
+    description: 'Whether or not to allow this IssueOps command to be run on draft pull requests'
+    required: true
+    default: "false"
+  allow_forks:
+    description: 'Whether or not to allow this IssueOps command to be run on forked pull requests'
+    required: true
+    default: "false"
+  skip_ci:
+    description: 'Whether or not to require passing CI checks before this IssueOps command can be run'
+    required: true
+    default: "false"
+  skip_reviews:
+    description: 'Whether or not to require reviews before this IssueOps command can be run'
+    required: true
+    default: "false"
   param_separator:
     description: 'The separator to use for parsing parameters in comments in IssueOps commands. Parameters will are saved as outputs and can be used in subsequent steps'
     required: true
@@ -35,6 +51,10 @@ inputs:
   allowlist_pat:
     description: 'A GitHub personal access token with "read:org" scopes. This is only needed if you are using the "allowlist" option with a GitHub org team. For example: "my-org/my-team"'
     required: false
+    default: "false"
+  skip_completing:
+    description: 'If set to "true", skip the process of completing a deployment. You must manually create a deployment status after the deployment is complete. Default is "false"'
+    required: true
     default: "false"
 outputs:
   triggered:
@@ -53,6 +73,17 @@ outputs:
     description: The reaction id for the initial reaction on the trigger comment
   actor_handle:
     description: The handle of the user who triggered the action
+  fork:
+    description: 'The string "true" if the pull request is a fork, otherwise "false"'
+  fork_ref:
+    description: 'The true ref of the fork'
+  fork_label:
+    description: 'The API label field returned for the fork'
+  fork_checkout:
+    description: 'The console command presented in the GitHub UI to checkout a given fork locally'
+  fork_full_name:
+    description: 'The full name of the fork in "org/repo" format'
 runs:
   using: "node16"
   main: "dist/index.js"
+  post: "dist/index.js"
