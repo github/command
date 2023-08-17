@@ -2,6 +2,6 @@
 
 IssueOps commands in GitHub Actions
 
-> Coming soon! Give this repo a star to follow along ⭐
+> Experimental project in the works
 
 ![ship-it](docs/assets/ship-it.jpg)
