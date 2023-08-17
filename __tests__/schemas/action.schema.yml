@@ -120,6 +120,16 @@ inputs:
     default:
       type: string
       required: false
+  skip_completing:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: false
   allow_forks:
     description:
       type: string
