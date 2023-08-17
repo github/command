@@ -13440,6 +13440,7 @@ async function run() {
 
     // Get variables from the event context
     const issue_number = github.context.payload.issue.number
+    core.setOutput('issue_number', issue_number)
 
     // check if the comment contains the command
     if (!(await triggerCheck(body, command))) {

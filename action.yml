@@ -69,6 +69,8 @@ outputs:
     description: The raw parameters that were passed into the IssueOps command
   comment_id:
     description: The comment id which triggered this action
+  issue_number:
+    description: The issue number which this Action was triggered on
   initial_reaction_id:
     description: The reaction id for the initial reaction on the trigger comment
   actor_handle:

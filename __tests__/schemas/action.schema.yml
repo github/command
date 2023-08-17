@@ -180,6 +180,10 @@ outputs:
     description:
       type: string
       required: true
+  issue_number:
+    description:
+      type: string
+      required: true
   continue:
     description:
       type: string
