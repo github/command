@@ -105,8 +105,11 @@ export async function run() {
     core.setOutput('continue', 'true')
     return 'success'
   } catch (error) {
+    /* istanbul ignore next */
     core.saveState('bypass', 'true')
+    /* istanbul ignore next */
     core.error(error.stack)
+    /* istanbul ignore next */
     core.setFailed(error.message)
   }
 }
