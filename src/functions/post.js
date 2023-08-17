@@ -3,6 +3,7 @@ import {contextCheck} from './context-check'
 import * as github from '@actions/github'
 import {context} from '@actions/github'
 import {postReactions} from './post-reactions'
+import {octokitRetry} from '@octokit/plugin-retry'
 
 // Default failure reaction
 const thumbsDown = '-1'
@@ -34,8 +35,10 @@ export async function post() {
       return
     }
 
-    // Create an octokit client
-    const octokit = github.getOctokit(token)
+    // Create an octokit client with the retry plugin
+    const octokit = github.getOctokit(token, {
+      additionalPlugins: [octokitRetry]
+    })
 
     // Check the Action status
     var success

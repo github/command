@@ -13326,6 +13326,7 @@ async function postReactions(octokit, context, reaction, reaction_id) {
 
 
 
+
 // Default failure reaction
 const post_thumbsDown = '-1'
 // Default success reaction
@@ -13356,8 +13357,10 @@ async function post() {
       return
     }
 
-    // Create an octokit client
-    const octokit = github.getOctokit(token)
+    // Create an octokit client with the retry plugin
+    const octokit = github.getOctokit(token, {
+      additionalPlugins: [dist_node.octokitRetry]
+    })
 
     // Check the Action status
     var success
