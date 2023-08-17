@@ -10695,10 +10695,10 @@ async function run() {
     const trigger = core.getInput('trigger')
     const reaction = core.getInput('reaction')
     const token = core.getInput('github_token', {required: true})
-    const allowForks = core.getInput('allow_forks') === 'true'
-    const skipCi = core.getInput('skip_ci')
-    const allow_drafts = core.getInput('allow_drafts')
-    const skipReviews = core.getInput('skip_reviews')
+    const allowForks = core.getBooleanInput('allow_forks')
+    const skipCi = core.getBooleanInput('skip_ci')
+    const allow_drafts = core.getBooleanInput('allow_drafts')
+    const skipReviews = core.getBooleanInput('skip_reviews')
     const param_separator = core.getInput('param_separator')
 
     // Create an octokit client
