@@ -269,7 +269,7 @@ test('runs prechecks and finds CI is passing and the PR has not been reviewed', 
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -374,7 +374,7 @@ test('runs prechecks and finds that the IssueOps command is on a PR from a forke
       false, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -413,7 +413,7 @@ test('runs prechecks and finds CI is pending and the PR has not been reviewed', 
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -479,7 +479,7 @@ test('runs prechecks and finds CI checked have not been defined and the PR has n
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -517,7 +517,7 @@ test('runs prechecks and finds the PR has been approved but CI checks are pendin
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -556,7 +556,7 @@ test('runs prechecks and finds CI is passing but the PR is missing an approval',
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -634,7 +634,7 @@ test('runs prechecks and finds the PR does not require approval but CI is failin
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -763,7 +763,7 @@ test('runs prechecks and finds the PR is a DRAFT PR and drafts are allowed', asy
       true,
       false,
       false,
-      true, // draft_permitted_targets input option
+      true, // allow_drafts input option
       context,
       octokit
     )
@@ -970,7 +970,7 @@ test('runs prechecks and finds that no CI checks exist but reviews are defined a
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1056,7 +1056,7 @@ test('runs prechecks and finds that skip_ci is set and the PR has been approved'
       true, // allow forks
       true, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1104,7 +1104,7 @@ test('runs prechecks and finds that the commit status is success and skip_review
       true,
       false, // skip_ci
       true, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1153,7 +1153,7 @@ test('runs prechecks and finds that skip_ci is set and no reviews are defined', 
       true,
       true, // skip_ci
       true, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1201,7 +1201,7 @@ test('runs prechecks and finds that skip_ci is set and skip_reviews is set', asy
       true,
       true, // skip_ci
       true, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1249,7 +1249,7 @@ test('runs prechecks and finds that skip_ci is set and the deployer is an admin'
       true,
       true, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1298,7 +1298,7 @@ test('runs prechecks and finds that CI is pending and reviewers have not been de
       true,
       false, // skip_ci
       false, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1340,7 +1340,7 @@ test('runs prechecks and finds that the PR is NOT reviewed and CI checks have be
       true,
       true, // skip_ci
       true, // skip_reviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context,
       octokit
     )
@@ -1381,7 +1381,7 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
       true, // allowForks
       false, // skipCi
       false, // skipReviews
-      false, // draft_permitted_targets
+      false, // allow_drafts
       context, // event context
       octokit // octokit instance
     )

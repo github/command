@@ -50,7 +50,7 @@ inputs:
     required:
       type: boolean
       required: true
-  draft_permitted_targets:
+  allow_drafts:
     description:
       type: string
       required: true
@@ -80,36 +80,6 @@ inputs:
     default:
       type: string
       required: true
-  noop_trigger:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  lock_trigger:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  unlock_trigger:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
   permissions:
     description:
       type: string
@@ -129,26 +99,6 @@ inputs:
       required: true
     required:
       type: boolean
-      required: true
-  stable_branch:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  update_branch:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
       required: true
   required_contexts:
     description:
@@ -190,7 +140,7 @@ inputs:
     default:
       type: string
       required: true
-  admins:
+  allowlist:
     description:
       type: string
       required: true
@@ -200,27 +150,7 @@ inputs:
     default:
       type: string
       required: true
-  admins_pat:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  merge_deploy_mode:
-    description:
-      type: string
-      required: true
-    required:
-      type: boolean
-      required: true
-    default:
-      type: string
-      required: true
-  skip_completing:
+  allowlist_pat:
     description:
       type: string
       required: true
@@ -245,15 +175,7 @@ outputs:
     description:
       type: string
       required: true
-  environment:
-    description:
-      type: string
-      required: true
   params:
-    description:
-      type: string
-      required: true
-  noop:
     description:
       type: string
       required: true
@@ -297,31 +219,11 @@ outputs:
     description:
       type: string
       required: true
-  deployment_id:
-    description:
-      type: string
-      required: true
-  environment_url:
-    description:
-      type: string
-      required: true
   initial_reaction_id:
     description:
       type: string
       required: true
   actor_handle:
-    description:
-      type: string
-      required: true
-  global_lock_claimed:
-    description:
-      type: string
-      required: true
-  global_lock_released:
-    description:
-      type: string
-      required: true
-  unlocked_environments:
     description:
       type: string
       required: true

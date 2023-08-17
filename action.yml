@@ -20,6 +20,22 @@ inputs:
     description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
     required: true
     default: "write,maintain,admin"
+  allow_drafts:
+    description: 'Whether or not to allow this IssueOps command to be run on draft pull requests'
+    required: true
+    default: "false"
+  allow_forks:
+    description: 'Whether or not to allow this IssueOps command to be run on forked pull requests'
+    required: true
+    default: "false"
+  skip_ci:
+    description: 'Whether or not to require passing CI checks before this IssueOps command can be run'
+    required: true
+    default: "false"
+  skip_reviews:
+    description: 'Whether or not to require reviews before this IssueOps command can be run'
+    required: true
+    default: "false"
   param_separator:
     description: 'The separator to use for parsing parameters in comments in IssueOps commands. Parameters will are saved as outputs and can be used in subsequent steps'
     required: true
@@ -52,3 +68,4 @@ outputs:
 runs:
   using: "node16"
   main: "dist/index.js"
+  post: "dist/index.js"

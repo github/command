@@ -10697,7 +10697,7 @@ async function run() {
     const token = core.getInput('github_token', {required: true})
     const allowForks = core.getInput('allow_forks') === 'true'
     const skipCi = core.getInput('skip_ci')
-    const draft_permitted_targets = core.getInput('draft_permitted_targets')
+    const allow_drafts = core.getInput('allow_drafts')
     const skipReviews = core.getInput('skip_reviews')
     const param_separator = core.getInput('param_separator')
 
@@ -10756,7 +10756,7 @@ async function run() {
       allowForks,
       skipCi,
       skipReviews,
-      draft_permitted_targets,
+      allow_drafts,
       params,
       github.context,
       octokit
