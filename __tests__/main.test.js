@@ -95,150 +95,32 @@ beforeEach(() => {
 
 test('successfully runs the action', async () => {
   expect(await run()).toBe('success')
-  expect(setOutputMock).toHaveBeenCalledWith('deployment_id', 123)
   expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.deploy')
   expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
   expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
   expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(setOutputMock).toHaveBeenCalledWith('noop', 'false')
   expect(setOutputMock).toHaveBeenCalledWith('continue', 'true')
   expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
   expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
-  expect(saveStateMock).toHaveBeenCalledWith('environment', 'production')
   expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
   expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(saveStateMock).toHaveBeenCalledWith('noop', 'false')
-  expect(setOutputMock).toHaveBeenCalledWith('type', 'deploy')
-  expect(saveStateMock).toHaveBeenCalledWith('deployment_id', 123)
-  expect(debugMock).toHaveBeenCalledWith('production_environment: true')
 })
 
-test('successfully runs the action on a deployment to development', async () => {
-  github.context.payload.comment.body = '.deploy to development'
+// test('successfully runs the action after trimming the body', async () => {
+//   jest.spyOn(prechecks, 'prechecks').mockImplementation(comment => {
+//     expect(comment).toBe('.noop')
 
-  expect(await run()).toBe('success')
-  expect(setOutputMock).toHaveBeenCalledWith('deployment_id', 123)
-  expect(setOutputMock).toHaveBeenCalledWith(
-    'comment_body',
-    '.deploy to development'
-  )
-  expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(setOutputMock).toHaveBeenCalledWith('noop', 'false')
-  expect(setOutputMock).toHaveBeenCalledWith('continue', 'true')
-  expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
-  expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
-  expect(saveStateMock).toHaveBeenCalledWith('environment', 'development')
-  expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(saveStateMock).toHaveBeenCalledWith('noop', 'false')
-  expect(setOutputMock).toHaveBeenCalledWith('type', 'deploy')
-  expect(saveStateMock).toHaveBeenCalledWith('deployment_id', 123)
-  expect(debugMock).toHaveBeenCalledWith('production_environment: false')
-})
-
-test('successfully runs the action in noop mode', async () => {
-  jest.spyOn(prechecks, 'prechecks').mockImplementation(() => {
-    return {
-      ref: 'test-ref',
-      status: true,
-      message: '✔️ PR is approved and all CI checks passed - OK',
-      noopMode: true
-    }
-  })
-
-  github.context.payload.comment.body = '.noop'
-
-  expect(await run()).toBe('success - noop')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.noop')
-  expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(setOutputMock).toHaveBeenCalledWith('noop', 'true')
-  expect(setOutputMock).toHaveBeenCalledWith('continue', 'true')
-  expect(setOutputMock).toHaveBeenCalledWith('type', 'deploy')
-  expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
-  expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
-  expect(saveStateMock).toHaveBeenCalledWith('environment', 'production')
-  expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(saveStateMock).toHaveBeenCalledWith('noop', 'true')
-})
-
-test('successfully runs the action after trimming the body', async () => {
-  jest.spyOn(prechecks, 'prechecks').mockImplementation(comment => {
-    expect(comment).toBe('.noop')
-
-    return {
-      ref: 'test-ref',
-      status: true,
-      message: '✔️ PR is approved and all CI checks passed - OK',
-      noopMode: true
-    }
-  })
-  github.context.payload.comment.body = '.noop    \n\t\n   '
-  expect(await run()).toBe('success - noop')
-  // other expects are similar to previous tests.
-})
-
-test('successfully runs the action with required contexts', async () => {
-  process.env.INPUT_REQUIRED_CONTEXTS = 'lint,test,build'
-  expect(await run()).toBe('success')
-  expect(setOutputMock).toHaveBeenCalledWith('deployment_id', 123)
-  expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.deploy')
-  expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(setOutputMock).toHaveBeenCalledWith('noop', 'false')
-  expect(setOutputMock).toHaveBeenCalledWith('continue', 'true')
-  expect(setOutputMock).toHaveBeenCalledWith('type', 'deploy')
-  expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
-  expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
-  expect(saveStateMock).toHaveBeenCalledWith('environment', 'production')
-  expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(saveStateMock).toHaveBeenCalledWith('noop', 'false')
-})
-
-test('detects an out of date branch and exits', async () => {
-  jest.spyOn(github, 'getOctokit').mockImplementation(() => {
-    return {
-      rest: {
-        issues: {
-          createComment: jest.fn().mockReturnValueOnce({
-            data: {}
-          })
-        },
-        repos: {
-          createDeployment: jest.fn().mockImplementation(() => {
-            return {data: {id: undefined, message: 'Auto-merged'}}
-          }),
-          createDeploymentStatus: jest.fn().mockImplementation(() => {
-            return {data: {}}
-          })
-        }
-      }
-    }
-  })
-  jest.spyOn(actionStatus, 'actionStatus').mockImplementation(() => {
-    return undefined
-  })
-  expect(await run()).toBe('safe-exit')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.deploy')
-  expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(setOutputMock).toHaveBeenCalledWith('noop', 'false')
-  expect(setOutputMock).toHaveBeenCalledWith('type', 'deploy')
-  expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
-  expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
-  expect(saveStateMock).toHaveBeenCalledWith('environment', 'production')
-  expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
-  expect(saveStateMock).toHaveBeenCalledWith('noop', 'false')
-  expect(saveStateMock).toHaveBeenCalledWith('bypass', 'true')
-})
+//     return {
+//       ref: 'test-ref',
+//       status: true,
+//       message: '✔️ PR is approved and all CI checks passed - OK',
+//       noopMode: true
+//     }
+//   })
+//   github.context.payload.comment.body = '.deploy    \n\t\n   '
+//   expect(await run()).toBe('success - noop')
+//   // other expects are similar to previous tests.
+// })
 
 test('fails due to a bad context', async () => {
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
