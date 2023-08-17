@@ -13469,14 +13469,11 @@ async function run() {
 
     // Execute prechecks to ensure the Action can proceed
     const precheckResults = await prechecks(
-      body,
-      command,
       issue_number,
       allowForks,
       skipCi,
       skipReviews,
       allow_drafts,
-      params,
       github.context,
       octokit
     )
