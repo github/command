@@ -54,9 +54,6 @@ inputs:
     description:
       type: string
       required: true
-    default:
-      type: string
-      required: true
     required:
       type: boolean
       required: true
@@ -176,14 +173,6 @@ outputs:
       type: string
       required: true
   params:
-    description:
-      type: string
-      required: true
-  sha:
-    description:
-      type: string
-      required: true
-  ref:
     description:
       type: string
       required: true
