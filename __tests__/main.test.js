@@ -93,27 +93,44 @@ test('successfully runs the action', async () => {
   expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
   expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
   expect(setOutputMock).toHaveBeenCalledWith('continue', 'true')
+  expect(setOutputMock).toHaveBeenCalledWith('params', '')
   expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
   expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
   expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
   expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
 })
 
-// test('successfully runs the action after trimming the body', async () => {
-//   jest.spyOn(prechecks, 'prechecks').mockImplementation(comment => {
-//     expect(comment).toBe('.noop')
+test('successfully runs the action with parameters', async () => {
+  const body = '.deploy | test1 test2 --vm-size=chonky'
+  github.context.payload.comment.body = body
+  process.env.INPUT_COMMAND = body
+  expect(await run()).toBe('success')
+  expect(setOutputMock).toHaveBeenCalledWith('comment_body', body)
+  expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
+  expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
+  expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
+  expect(setOutputMock).toHaveBeenCalledWith('continue', 'true')
+  expect(setOutputMock).toHaveBeenCalledWith('params', 'test1 test2 --vm-size=chonky')
+  expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
+  expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
+  expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
+  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
+})
 
-//     return {
-//       ref: 'test-ref',
-//       status: true,
-//       message: '✔️ PR is approved and all CI checks passed - OK',
-//       noopMode: true
-//     }
-//   })
-//   github.context.payload.comment.body = '.deploy    \n\t\n   '
-//   expect(await run()).toBe('success - noop')
-//   // other expects are similar to previous tests.
-// })
+test('successfully runs the action after trimming the body', async () => {
+    const body = '.deploy    \n\t\n   '
+    expect(await run()).toBe('success')
+    expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.deploy')
+    expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
+    expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
+    expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
+    expect(setOutputMock).toHaveBeenCalledWith('continue', 'true')
+    expect(setOutputMock).toHaveBeenCalledWith('params', '')
+    expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
+    expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
+    expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
+    expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
+})
 
 test('fails due to a bad context', async () => {
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
