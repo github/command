@@ -53,7 +53,7 @@ export async function prechecks(
 
     // If this Action's inputs have been configured to explicitly prevent forks, exit
     if (allowForks === false) {
-      message = `### ⚠️ Cannot proceed\n\nThis Action has been explicity configured to prevent operations from forks. You can change this via this Action's inputs if needed`
+      message = `### ⚠️ Cannot proceed with operation\n\nThis Action has been explicity configured to prevent operations from forks. You can change this via this Action's inputs if needed`
       return {message: message, status: false}
     }
 
@@ -309,7 +309,7 @@ export async function prechecks(
       reviewDecision === 'skip_reviews') &&
     commitStatus === 'PENDING'
   ) {
-    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks must be passing in order to continue`
+    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue`
     return {message: message, status: false}
 
     // If CI is passing but the PR is missing an approval, let the user know
