@@ -72,6 +72,14 @@ test('runs isAllowed checks and does not find a valid admin', async () => {
   )
 })
 
+test('runs isAllowed checks and determines that all users are allowed because it is unset', async () => {
+  process.env.INPUT_ALLOWLIST = 'false'
+  expect(await isAllowed(context)).toStrictEqual(true)
+  expect(debugMock).toHaveBeenCalledWith(
+    'no allowlist provided, all users are allowed'
+  )
+})
+
 test('runs isAllowed checks for an org team and fails due to no admins_pat', async () => {
   process.env.INPUT_ALLOWLIST_PAT = 'false'
   process.env.INPUT_ALLOWLIST = 'octoawesome/octo-awesome'

@@ -12933,6 +12933,12 @@ async function isAllowed(context) {
 
   core.debug(`raw allowlist value: ${allowlist}`)
 
+  // if the allowlist is set to "false" or it is empty, then all users are allowed
+  if (!allowlist || allowlist.length === 0 || allowlist === 'false') {
+    core.debug('no allowlist provided, all users are allowed')
+    return true
+  }
+
   // Sanitized the input to remove any whitespace and split into an array
   const allowlistSanitized = allowlist
     .split(',')
