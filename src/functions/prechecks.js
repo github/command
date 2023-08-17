@@ -139,7 +139,7 @@ export async function prechecks(
     // Check to see if skipCi is set for the environment being used
     if (skipCi) {
       core.info(
-        `CI checks are not required for this operation - proceeding - OK`
+        `✔️ CI checks are not required for this operation - proceeding - OK`
       )
       commitStatus = 'skip_ci'
     }
@@ -178,13 +178,15 @@ export async function prechecks(
   }
 
   // Get allowed operator data
-  const userIsOperator = await isAllowed(context)
+  if (!await isAllowed(context)) {
+    message = `### ⚠️ Cannot proceed with operation\n\n> User ${context.actor} is not an allowed operator`
+    return {message: message, status: false}
+  }
 
   // log values for debugging
   core.debug('precheck values for debugging:')
   core.debug(`reviewDecision: ${reviewDecision}`)
   core.debug(`commitStatus: ${commitStatus}`)
-  core.debug(`userIsOperator: ${userIsOperator}`)
   core.debug(`skipCi: ${skipCi}`)
   core.debug(`skipReviews: ${skipReviews}`)
   core.debug(`allowForks: ${allowForks}`)
@@ -220,63 +222,35 @@ export async function prechecks(
     // CI checks are set to be bypassed and the pull request is approved
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'APPROVED') {
     message =
-      '✔️ CI requirements have been disabled for this environment and the PR has been approved - OK'
+      '✔️ CI requirements have been disabled for this operation and the PR has been approved - OK'
     core.info(message)
 
     // CI checks are set to be bypassed BUT required reviews have not been defined
   } else if (commitStatus === 'skip_ci' && reviewDecision === null) {
     message =
-      '⚠️ CI requirements have been disabled for this environment and required reviewers have not been defined... proceeding - OK'
+      '⚠️ CI requirements have been disabled for this operation and required reviewers have not been defined... proceeding - OK'
     core.info(message)
 
     // CI checks are set to be bypassed and the PR has not been reviewed
   } else if (
     commitStatus === 'skip_ci' &&
-    reviewDecision === 'REVIEW_REQUIRED' &&
-    userIsOperator === false
+    reviewDecision === 'REVIEW_REQUIRED'
   ) {
     message = `⚠️ CI checks are not required for this operation but the PR has not been reviewed`
     return {message: message, status: false}
-
-    // If CI checks are set to be bypassed and the operator is an allowed operator
-  } else if (commitStatus === 'skip_ci' && userIsOperator === true) {
-    message =
-      '✔️ CI is not required for this operation and approval is bypassed due to admin rights - OK'
-    core.info(message)
 
     // If CI checks are set to be bypassed and PR reviews are also set to by bypassed
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'skip_reviews') {
     message = '✔️ CI and PR reviewers are not required for this operation - OK'
     core.info(message)
-  } else if (
-    reviewDecision == 'REVIEW_REQUIRED' &&
-    commitStatus === 'SUCCESS' &&
-    userIsOperator === true
-  ) {
-    message =
-      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK'
-    core.info(message)
 
-    // If CI is passing but the PR has not been reviewed and it is not an allowed operator
+    // If CI is passing but the PR has not been reviewed
   } else if (
     reviewDecision === 'REVIEW_REQUIRED' &&
-    commitStatus === 'SUCCESS' &&
-    userIsOperator === false
+    commitStatus === 'SUCCESS'
   ) {
     message = '⚠️ CI checks are passing but the PR has not been reviewed'
     return {message: message, status: false}
-
-    // If CI is passing and the operator is an allowed operator
-  } else if (commitStatus === 'SUCCESS' && userIsOperator === true) {
-    message =
-      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK'
-    core.info(message)
-
-    // If CI is undefined and the operator is an allowed operator
-  } else if (commitStatus === null && userIsOperator === true) {
-    message =
-      '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK'
-    core.info(message)
 
     // If CI has not been defined but the PR has been approved
   } else if (commitStatus === null && reviewDecision === 'APPROVED') {
@@ -322,7 +296,7 @@ export async function prechecks(
     (reviewDecision === null || reviewDecision === 'skip_reviews') &&
     commitStatus === 'FAILURE'
   ) {
-    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> Your pull request does not require approvals but CI checks are failing`
+    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue`
     return {message: message, status: false}
   }
 

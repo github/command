@@ -21,6 +21,10 @@ beforeEach(() => {
     return true
   })
 
+  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
+    return true
+  })
+
   context = {
     actor: 'monalisa',
     repo: {
@@ -424,6 +428,86 @@ test('runs prechecks and finds CI is pending and the PR has not been reviewed', 
   })
 })
 
+test('runs prechecks and finds CI is pending and the PR has not been reviewed but skip_reviews is set', async () => {
+  octokit.graphql = jest.fn().mockReturnValue({
+    repository: {
+      pullRequest: {
+        reviewDecision: 'REVIEW_REQUIRED',
+        commits: {
+          nodes: [
+            {
+              commit: {
+                checkSuites: {
+                  totalCount: 2
+                },
+                statusCheckRollup: {
+                  state: 'PENDING'
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+
+  expect(
+    await prechecks(
+      '123',
+      true, // allow forks
+      false, // skip_ci
+      true, // skip_reviews
+      false, // allow_drafts
+      context,
+      octokit
+    )
+  ).toStrictEqual({
+    message:
+      '### ⚠️ Cannot proceed with operation\n\n- reviewDecision: `skip_reviews`\n- commitStatus: `PENDING`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue',
+    status: false
+  })
+})
+
+test('runs prechecks and finds CI is failing and the PR has not been reviewed but skip_reviews is set', async () => {
+  octokit.graphql = jest.fn().mockReturnValue({
+    repository: {
+      pullRequest: {
+        reviewDecision: 'REVIEW_REQUIRED',
+        commits: {
+          nodes: [
+            {
+              commit: {
+                checkSuites: {
+                  totalCount: 2
+                },
+                statusCheckRollup: {
+                  state: 'FAILURE'
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+
+  expect(
+    await prechecks(
+      '123',
+      true, // allow forks
+      false, // skip_ci
+      true, // skip_reviews
+      false, // allow_drafts
+      context,
+      octokit
+    )
+  ).toStrictEqual({
+    message:
+      '### ⚠️ Cannot proceed with operation\n\n- reviewDecision: `skip_reviews`\n- commitStatus: `FAILURE`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue',
+    status: false
+  })
+})
+
 test('runs prechecks and finds CI is pending and reviewers have not been defined', async () => {
   octokit.graphql = jest.fn().mockReturnValue({
     repository: {
@@ -640,8 +724,49 @@ test('runs prechecks and finds the PR does not require approval but CI is failin
     )
   ).toStrictEqual({
     message:
-      '### ⚠️ Cannot proceed with operation\n\n- reviewDecision: `null`\n- commitStatus: `FAILURE`\n\n> Your pull request does not require approvals but CI checks are failing',
+      '### ⚠️ Cannot proceed with operation\n\n- reviewDecision: `null`\n- commitStatus: `FAILURE`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue',
     status: false
+  })
+})
+
+test('runs prechecks and finds the skip_ci is set and reviews are not required', async () => {
+  octokit.graphql = jest.fn().mockReturnValue({
+    repository: {
+      pullRequest: {
+        reviewDecision: null,
+        commits: {
+          nodes: [
+            {
+              commit: {
+                checkSuites: {
+                  totalCount: 1
+                },
+                statusCheckRollup: {
+                  state: 'FAILURE'
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+  expect(
+    await prechecks(
+      '123',
+      true, // allow forks
+      true, // skip_ci
+      false, // skip_reviews
+      false, // allow_drafts
+      context,
+      octokit
+    )
+  ).toStrictEqual({
+    message:
+      '⚠️ CI requirements have been disabled for this operation and required reviewers have not been defined... proceeding - OK',
+    status: true,
+    ref: 'test-ref',
+    sha: 'abc123'
   })
 })
 
@@ -787,129 +912,6 @@ test('runs prechecks and fails with a non 200 permissionRes.status', async () =>
   })
 })
 
-test('runs prechecks and finds that the IssueOps commands are valid with parameters and from a defined admin', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'REVIEW_REQUIRED',
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 1
-                },
-                statusCheckRollup: {
-                  state: 'SUCCESS'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return true
-  })
-
-  expect(
-    await prechecks('123', true, false, false, false, context, octokit)
-  ).toStrictEqual({
-    message:
-      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK',
-    ref: 'test-ref',
-    status: true,
-    sha: 'abc123'
-  })
-})
-
-test('runs prechecks and finds that the IssueOps commands are valid with parameters and from a defined admin', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'REVIEW_REQUIRED',
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 1
-                },
-                statusCheckRollup: {
-                  state: 'SUCCESS'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return true
-  })
-
-  expect(
-    await prechecks(
-      '123',
-      true,
-      false,
-      false,
-      false,
-
-      context,
-      octokit
-    )
-  ).toStrictEqual({
-    message:
-      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK',
-    ref: 'test-ref',
-    status: true,
-    sha: 'abc123'
-  })
-})
-
-test('runs prechecks and finds that the IssueOps commands are valid with parameters and from a defined admin when CI is not defined', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'REVIEW_REQUIRED',
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 1
-                },
-                statusCheckRollup: {
-                  state: null
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return true
-  })
-  expect(
-    await prechecks('123', true, false, false, false, context, octokit)
-  ).toStrictEqual({
-    message:
-      '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK',
-    ref: 'test-ref',
-    status: true,
-    sha: 'abc123'
-  })
-
-  expect(infoMock).toHaveBeenLastCalledWith(
-    '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK'
-  )
-})
-
 test('runs prechecks and finds that no CI checks exist and reviews are not defined', async () => {
   octokit.graphql = jest.fn().mockReturnValue({
     repository: {
@@ -944,7 +946,7 @@ test('runs prechecks and finds that no CI checks exist and reviews are not defin
   )
 })
 
-test('runs prechecks and finds that no CI checks exist but reviews are defined and it is from an admin', async () => {
+test('runs prechecks and finds that no CI checks exist but reviews are defined', async () => {
   octokit.graphql = jest.fn().mockReturnValue({
     repository: {
       pullRequest: {
@@ -976,17 +978,14 @@ test('runs prechecks and finds that no CI checks exist but reviews are defined a
     )
   ).toStrictEqual({
     message:
-      '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK',
+      '✔️ CI checks have not been defined but the PR has been approved - OK',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
-  expect(infoMock).toHaveBeenLastCalledWith(
-    '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK'
-  )
 })
 
-test('runs prechecks and finds that no CI checks exist and the PR is not approved, but it also is from an admin', async () => {
+test('runs prechecks and finds that no CI checks exist and the PR is not approved', async () => {
   octokit.graphql = jest.fn().mockReturnValue({
     repository: {
       pullRequest: {
@@ -1010,23 +1009,16 @@ test('runs prechecks and finds that no CI checks exist and the PR is not approve
     await prechecks(
       '123',
       true, // allow forks
-      false,
-      false,
-      false,
+      false, // skip_ci
+      false, // skip_reviews
+      false, // allow_drafts
       context,
       octokit
     )
   ).toStrictEqual({
-    message:
-      '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK',
-    status: true,
-
-    ref: 'test-ref',
-    sha: 'abc123'
+    message: `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`REVIEW_REQUIRED\`\n- commitStatus: \`null\``,
+    status: false,
   })
-  expect(infoMock).toHaveBeenLastCalledWith(
-    '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK'
-  )
 })
 
 test('runs prechecks and finds that skip_ci is set and the PR has been approved', async () => {
@@ -1062,38 +1054,14 @@ test('runs prechecks and finds that skip_ci is set and the PR has been approved'
     )
   ).toStrictEqual({
     message:
-      '✔️ CI requirements have been disabled for this environment and the PR has been approved - OK',
+      '✔️ CI requirements have been disabled for this operation and the PR has been approved - OK',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
-  expect(infoMock).toHaveBeenCalledWith(
-    '✔️ CI requirements have been disabled for this environment and the PR has been approved - OK'
-  )
 })
 
-test('runs prechecks and finds that the commit status is success and skip_reviews is set', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'REVIEW_REQUIRED',
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 1
-                },
-                statusCheckRollup: {
-                  state: 'SUCCESS'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
+test('runs prechecks and finds that the user is not an allowed operator', async () => {
   jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
     return false
   })
@@ -1110,15 +1078,9 @@ test('runs prechecks and finds that the commit status is success and skip_review
     )
   ).toStrictEqual({
     message:
-      '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK',
-    ref: 'test-ref',
-    status: true,
-    sha: 'abc123'
+      `### ⚠️ Cannot proceed with operation\n\n> User monalisa is not an allowed operator`,
+    status: false,
   })
-
-  expect(infoMock).toHaveBeenCalledWith(
-    '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK'
-  )
 })
 
 test('runs prechecks and finds that skip_ci is set and no reviews are defined', async () => {
@@ -1142,9 +1104,6 @@ test('runs prechecks and finds that skip_ci is set and no reviews are defined', 
         }
       }
     }
-  })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return false
   })
 
   expect(
@@ -1191,9 +1150,6 @@ test('runs prechecks and finds that skip_ci is set and skip_reviews is set', asy
       }
     }
   })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return false
-  })
 
   expect(
     await prechecks(
@@ -1217,7 +1173,7 @@ test('runs prechecks and finds that skip_ci is set and skip_reviews is set', asy
   )
 })
 
-test('runs prechecks and finds that skip_ci is set and the deployer is an admin', async () => {
+test('runs prechecks and finds that skip_ci is set', async () => {
   octokit.graphql = jest.fn().mockReturnValue({
     repository: {
       pullRequest: {
@@ -1239,9 +1195,6 @@ test('runs prechecks and finds that skip_ci is set and the deployer is an admin'
       }
     }
   })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return true
-  })
 
   expect(
     await prechecks(
@@ -1255,15 +1208,9 @@ test('runs prechecks and finds that skip_ci is set and the deployer is an admin'
     )
   ).toStrictEqual({
     message:
-      '✔️ CI is not required for this operation and approval is bypassed due to admin rights - OK',
-    ref: 'test-ref',
-    status: true,
-    sha: 'abc123'
+      '⚠️ CI checks are not required for this operation but the PR has not been reviewed',
+    status: false,
   })
-
-  expect(infoMock).toHaveBeenCalledWith(
-    '✔️ CI is not required for this operation and approval is bypassed due to admin rights - OK'
-  )
 })
 
 test('runs prechecks and finds that CI is pending and reviewers have not been defined', async () => {
@@ -1287,9 +1234,6 @@ test('runs prechecks and finds that CI is pending and reviewers have not been de
         }
       }
     }
-  })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return false
   })
 
   expect(
@@ -1329,9 +1273,6 @@ test('runs prechecks and finds that the PR is NOT reviewed and CI checks have be
         }
       }
     }
-  })
-  jest.spyOn(isAllowed, 'isAllowed').mockImplementation(() => {
-    return false
   })
 
   expect(
@@ -1387,6 +1328,47 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
     )
   ).toStrictEqual({
     message: '✔️ PR is approved and all CI checks passed - OK',
+    status: true,
+    ref: 'test-ref',
+    sha: 'abc123'
+  })
+})
+
+test('runs prechecks and finds the PR is approved and ci is passing', async () => {
+  octokit.graphql = jest.fn().mockReturnValue({
+    repository: {
+      pullRequest: {
+        reviewDecision: 'REVIEW_REQUIRED',
+        commits: {
+          nodes: [
+            {
+              commit: {
+                checkSuites: {
+                  totalCount: 1
+                },
+                statusCheckRollup: {
+                  state: 'SUCCESS'
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+
+  expect(
+    await prechecks(
+      '123', // issue_number
+      true, // allowForks
+      false, // skipCi
+      true, // skipReviews
+      false, // allow_drafts
+      context, // event context
+      octokit // octokit instance
+    )
+  ).toStrictEqual({
+    message: '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
