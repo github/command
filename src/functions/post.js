@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import {contextCheck} from './context-check'
 import * as github from '@actions/github'
 import {context} from '@actions/github'
-import { postReactions } from './post-reactions'
+import {postReactions} from './post-reactions'
 
 // Default failure reaction
 const thumbsDown = '-1'

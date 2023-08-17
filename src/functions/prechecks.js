@@ -178,7 +178,7 @@ export async function prechecks(
   }
 
   // Get allowed operator data
-  if (!await isAllowed(context)) {
+  if (!(await isAllowed(context))) {
     message = `### ⚠️ Cannot proceed with operation\n\n> User ${context.actor} is not an allowed operator`
     return {message: message, status: false}
   }

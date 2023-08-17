@@ -1017,7 +1017,7 @@ test('runs prechecks and finds that no CI checks exist and the PR is not approve
     )
   ).toStrictEqual({
     message: `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`REVIEW_REQUIRED\`\n- commitStatus: \`null\``,
-    status: false,
+    status: false
   })
 })
 
@@ -1077,9 +1077,8 @@ test('runs prechecks and finds that the user is not an allowed operator', async 
       octokit
     )
   ).toStrictEqual({
-    message:
-      `### ⚠️ Cannot proceed with operation\n\n> User monalisa is not an allowed operator`,
-    status: false,
+    message: `### ⚠️ Cannot proceed with operation\n\n> User monalisa is not an allowed operator`,
+    status: false
   })
 })
 
@@ -1209,7 +1208,7 @@ test('runs prechecks and finds that skip_ci is set', async () => {
   ).toStrictEqual({
     message:
       '⚠️ CI checks are not required for this operation but the PR has not been reviewed',
-    status: false,
+    status: false
   })
 })
 
@@ -1368,7 +1367,8 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
       octokit // octokit instance
     )
   ).toStrictEqual({
-    message: '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK',
+    message:
+      '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'

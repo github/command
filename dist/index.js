@@ -13126,7 +13126,7 @@ async function prechecks(
     // Check to see if skipCi is set for the environment being used
     if (skipCi) {
       core.info(
-        `CI checks are not required for this operation - proceeding - OK`
+        `✔️ CI checks are not required for this operation - proceeding - OK`
       )
       commitStatus = 'skip_ci'
     }
@@ -13165,13 +13165,15 @@ async function prechecks(
   }
 
   // Get allowed operator data
-  const userIsOperator = await isAllowed(context)
+  if (!(await isAllowed(context))) {
+    message = `### ⚠️ Cannot proceed with operation\n\n> User ${context.actor} is not an allowed operator`
+    return {message: message, status: false}
+  }
 
   // log values for debugging
   core.debug('precheck values for debugging:')
   core.debug(`reviewDecision: ${reviewDecision}`)
   core.debug(`commitStatus: ${commitStatus}`)
-  core.debug(`userIsOperator: ${userIsOperator}`)
   core.debug(`skipCi: ${skipCi}`)
   core.debug(`skipReviews: ${skipReviews}`)
   core.debug(`allowForks: ${allowForks}`)
@@ -13207,63 +13209,35 @@ async function prechecks(
     // CI checks are set to be bypassed and the pull request is approved
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'APPROVED') {
     message =
-      '✔️ CI requirements have been disabled for this environment and the PR has been approved - OK'
+      '✔️ CI requirements have been disabled for this operation and the PR has been approved - OK'
     core.info(message)
 
     // CI checks are set to be bypassed BUT required reviews have not been defined
   } else if (commitStatus === 'skip_ci' && reviewDecision === null) {
     message =
-      '⚠️ CI requirements have been disabled for this environment and required reviewers have not been defined... proceeding - OK'
+      '⚠️ CI requirements have been disabled for this operation and required reviewers have not been defined... proceeding - OK'
     core.info(message)
 
     // CI checks are set to be bypassed and the PR has not been reviewed
   } else if (
     commitStatus === 'skip_ci' &&
-    reviewDecision === 'REVIEW_REQUIRED' &&
-    userIsOperator === false
+    reviewDecision === 'REVIEW_REQUIRED'
   ) {
     message = `⚠️ CI checks are not required for this operation but the PR has not been reviewed`
     return {message: message, status: false}
-
-    // If CI checks are set to be bypassed and the operator is an allowed operator
-  } else if (commitStatus === 'skip_ci' && userIsOperator === true) {
-    message =
-      '✔️ CI is not required for this operation and approval is bypassed due to admin rights - OK'
-    core.info(message)
 
     // If CI checks are set to be bypassed and PR reviews are also set to by bypassed
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'skip_reviews') {
     message = '✔️ CI and PR reviewers are not required for this operation - OK'
     core.info(message)
-  } else if (
-    reviewDecision == 'REVIEW_REQUIRED' &&
-    commitStatus === 'SUCCESS' &&
-    userIsOperator === true
-  ) {
-    message =
-      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK'
-    core.info(message)
 
-    // If CI is passing but the PR has not been reviewed and it is not an allowed operator
+    // If CI is passing but the PR has not been reviewed
   } else if (
     reviewDecision === 'REVIEW_REQUIRED' &&
-    commitStatus === 'SUCCESS' &&
-    userIsOperator === false
+    commitStatus === 'SUCCESS'
   ) {
     message = '⚠️ CI checks are passing but the PR has not been reviewed'
     return {message: message, status: false}
-
-    // If CI is passing and the operator is an allowed operator
-  } else if (commitStatus === 'SUCCESS' && userIsOperator === true) {
-    message =
-      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK'
-    core.info(message)
-
-    // If CI is undefined and the operator is an allowed operator
-  } else if (commitStatus === null && userIsOperator === true) {
-    message =
-      '✔️ CI checks have not been defined and approval is bypassed due to allowed operator rights - OK'
-    core.info(message)
 
     // If CI has not been defined but the PR has been approved
   } else if (commitStatus === null && reviewDecision === 'APPROVED') {
@@ -13309,7 +13283,7 @@ async function prechecks(
     (reviewDecision === null || reviewDecision === 'skip_reviews') &&
     commitStatus === 'FAILURE'
   ) {
-    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> Your pull request does not require approvals but CI checks are failing`
+    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue`
     return {message: message, status: false}
   }
 
@@ -13322,7 +13296,31 @@ async function prechecks(
   }
 }
 
+;// CONCATENATED MODULE: ./src/functions/post-reactions.js
+// Helper function for adding reactions to the issue_comment on the 'post' event
+// :param octokit: An authenticated octokit client
+// :param context: The github context
+// :param reaction: The reaction to add to the issue_comment
+// :param reaction_id: The reaction_id of the initial reaction on the issue_comment
+async function postReactions(octokit, context, reaction, reaction_id) {
+  // Update the action status to indicate the result of the action as a reaction
+  // add a reaction to the issue_comment to indicate success or failure
+  await octokit.rest.reactions.createForIssueComment({
+    ...context.repo,
+    comment_id: context.payload.comment.id,
+    content: reaction
+  })
+
+  // remove the initial reaction on the IssueOp comment that triggered this action
+  await octokit.rest.reactions.deleteForIssueComment({
+    ...context.repo,
+    comment_id: context.payload.comment.id,
+    reaction_id: parseInt(reaction_id)
+  })
+}
+
 ;// CONCATENATED MODULE: ./src/functions/post.js
+
 
 
 
@@ -13335,12 +13333,11 @@ const post_thumbsUp = '+1'
 
 async function post() {
   try {
-    const comment_id = core.getState('comment_id')
     const reaction_id = core.getState('reaction_id')
     const token = core.getState('actionsToken')
     const bypass = core.getState('bypass')
     const status = core.getInput('status')
-    const skip_completing = core.getInput('skip_completing')
+    const skip_completing = core.getBooleanInput('skip_completing')
 
     // If bypass is set, exit the workflow
     if (bypass === 'true') {
@@ -13353,23 +13350,16 @@ async function post() {
       return
     }
 
-    // Skip the process of completing a deployment, return
+    // if skip_completing is set, return
     if (skip_completing === 'true') {
       core.info('skip_completing set, exiting')
       return
     }
 
-    // Check the inputs to ensure they are valid
-    if (!comment_id || comment_id.length === 0) {
-      throw new Error('no comment_id provided')
-    } else if (!status || status.length === 0) {
-      throw new Error('no status provided')
-    }
-
     // Create an octokit client
     const octokit = github.getOctokit(token)
 
-    // Check the deployment status
+    // Check the Action status
     var success
     if (status === 'success') {
       success = true
@@ -13385,20 +13375,8 @@ async function post() {
       reaction = post_thumbsDown
     }
 
-    // Update the action status to indicate the result of the deployment as a comment
-    // add a reaction to the issue_comment to indicate success or failure
-    await octokit.rest.reactions.createForIssueComment({
-      ...github.context.repo,
-      comment_id: github.context.payload.comment.id,
-      content: reaction
-    })
-
-    // remove the initial reaction on the IssueOp comment that triggered this action
-    await octokit.rest.reactions.deleteForIssueComment({
-      ...github.context.repo,
-      comment_id: github.context.payload.comment.id,
-      reaction_id: parseInt(reaction_id)
-    })
+    // Update the reactions on the command comment
+    await postReactions(octokit, github.context, reaction, reaction_id)
 
     return
   } catch (error) {
@@ -13424,7 +13402,7 @@ async function post() {
 async function run() {
   try {
     // Get the inputs for the branch-deploy Action
-    const trigger = core.getInput('trigger')
+    const command = core.getInput('command', {required: true})
     const reaction = core.getInput('reaction')
     const token = core.getInput('github_token', {required: true})
     const allowForks = core.getBooleanInput('allow_forks')
@@ -13454,14 +13432,12 @@ async function run() {
     // Get variables from the event context
     const issue_number = github.context.payload.issue.number
 
-    // Check if the comment is a trigger and what type of trigger it is
-    const isDeploy = await triggerCheck(body, trigger)
-
-    if (!isDeploy) {
-      // If the comment does not activate any triggers, exit
+    // check if the comment contains the command
+    if (!(await triggerCheck(body, command))) {
+      // if the comment does not contain the command, exit
       core.saveState('bypass', 'true')
       core.setOutput('triggered', 'false')
-      core.info('no trigger detected in comment - exiting')
+      core.info('no command detected in comment - exiting')
       return 'safe-exit'
     }
 
@@ -13485,7 +13461,7 @@ async function run() {
     // Execute prechecks to ensure the Action can proceed
     const precheckResults = await prechecks(
       body,
-      trigger,
+      command,
       issue_number,
       allowForks,
       skipCi,
@@ -13517,8 +13493,11 @@ async function run() {
     core.setOutput('continue', 'true')
     return 'success'
   } catch (error) {
+    /* istanbul ignore next */
     core.saveState('bypass', 'true')
+    /* istanbul ignore next */
     core.error(error.stack)
+    /* istanbul ignore next */
     core.setFailed(error.message)
   }
 }

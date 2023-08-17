@@ -45,7 +45,7 @@ export async function run() {
     const issue_number = context.payload.issue.number
 
     // check if the comment contains the command
-    if (!await triggerCheck(body, command)) {
+    if (!(await triggerCheck(body, command))) {
       // if the comment does not contain the command, exit
       core.saveState('bypass', 'true')
       core.setOutput('triggered', 'false')

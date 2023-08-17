@@ -41,7 +41,7 @@ beforeEach(() => {
   jest.spyOn(postReactions, 'postReactions').mockImplementation(() => {
     return true
   })
-  
+
   // spy and return a mock octokit object with methods
   jest.spyOn(github, 'getOctokit').mockImplementation(() => {
     return true
