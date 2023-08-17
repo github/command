@@ -22,7 +22,7 @@ beforeEach(() => {
   jest.spyOn(core, 'warning').mockImplementation(() => {})
   jest.spyOn(core, 'error').mockImplementation(() => {})
   process.env.INPUT_GITHUB_TOKEN = 'faketoken'
-  process.env.INPUT_TRIGGER = '.deploy'
+  process.env.INPUT_COMMAND = '.deploy'
   process.env.INPUT_REACTION = 'eyes'
   process.env.INPUT_PARAM_SEPARATOR = '|'
   process.env.INPUT_REQUIRED_CONTEXTS = 'false'
@@ -123,10 +123,10 @@ test('fails due to a bad context', async () => {
 })
 
 test('fails due to no trigger being found', async () => {
-  process.env.INPUT_TRIGGER = '.shipit'
+  process.env.INPUT_COMMAND = '.shipit'
   expect(await run()).toBe('safe-exit')
   expect(infoMock).toHaveBeenCalledWith(
-    'no trigger detected in comment - exiting'
+    'no command detected in comment - exiting'
   )
 })
 

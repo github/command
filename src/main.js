@@ -14,7 +14,7 @@ import {post} from './functions/post'
 export async function run() {
   try {
     // Get the inputs for the branch-deploy Action
-    const trigger = core.getInput('trigger')
+    const command = core.getInput('command', {required: true})
     const reaction = core.getInput('reaction')
     const token = core.getInput('github_token', {required: true})
     const allowForks = core.getBooleanInput('allow_forks')
@@ -44,14 +44,12 @@ export async function run() {
     // Get variables from the event context
     const issue_number = context.payload.issue.number
 
-    // Check if the comment is a trigger and what type of trigger it is
-    const isDeploy = await triggerCheck(body, trigger)
-
-    if (!isDeploy) {
-      // If the comment does not activate any triggers, exit
+    // check if the comment contains the command
+    if (!await triggerCheck(body, command)) {
+      // if the comment does not contain the command, exit
       core.saveState('bypass', 'true')
       core.setOutput('triggered', 'false')
-      core.info('no trigger detected in comment - exiting')
+      core.info('no command detected in comment - exiting')
       return 'safe-exit'
     }
 
@@ -75,7 +73,7 @@ export async function run() {
     // Execute prechecks to ensure the Action can proceed
     const precheckResults = await prechecks(
       body,
-      trigger,
+      command,
       issue_number,
       allowForks,
       skipCi,
