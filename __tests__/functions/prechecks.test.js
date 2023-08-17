@@ -147,15 +147,7 @@ test('runs prechecks and finds that the IssueOps command is valid without define
 test('runs prechecks and fails due to a bad pull request', async () => {
   octokit.rest.pulls.get = jest.fn().mockReturnValueOnce({status: 500})
   expect(
-    await prechecks(
-      '123',
-      true,
-      false,
-      false,
-      false,
-      context,
-      octokit
-    )
+    await prechecks('123', true, false, false, false, context, octokit)
   ).toStrictEqual({
     message: 'Could not retrieve PR info: 500',
     status: false
@@ -283,7 +275,7 @@ test('runs prechecks and finds CI is passing and the PR has not been reviewed', 
     )
   ).toStrictEqual({
     message: '⚠️ CI checks are passing but the PR has not been reviewed',
-    status: false,
+    status: false
   })
 })
 
@@ -493,7 +485,7 @@ test('runs prechecks and finds CI checked have not been defined and the PR has n
     )
   ).toStrictEqual({
     message: `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`REVIEW_REQUIRED\`\n- commitStatus: \`null\``,
-    status: false,
+    status: false
   })
 })
 
@@ -569,8 +561,7 @@ test('runs prechecks and finds CI is passing but the PR is missing an approval',
       octokit
     )
   ).toStrictEqual({
-    message:
-      '⚠️ CI checks are passing but the PR has not been reviewed',
+    message: '⚠️ CI checks are passing but the PR has not been reviewed',
     status: false
   })
 })
@@ -721,15 +712,7 @@ test('runs prechecks and finds the PR is a DRAFT PR', async () => {
   })
 
   expect(
-    await prechecks(
-      '123',
-      true,
-      false,
-      false,
-      false,
-      context,
-      octokit
-    )
+    await prechecks('123', true, false, false, false, context, octokit)
   ).toStrictEqual({
     message:
       '### ⚠️ Cannot proceed with operation\n\n> Your pull request is in a draft state',
@@ -797,15 +780,7 @@ test('runs prechecks and fails with a non 200 permissionRes.status', async () =>
     return 'Permission check returns non-200 status: 500'
   })
   expect(
-    await prechecks(
-      '123',
-      true,
-      false,
-      false,
-      false,
-      context,
-      octokit
-    )
+    await prechecks('123', true, false, false, false, context, octokit)
   ).toStrictEqual({
     message: 'Permission check returns non-200 status: 500',
     status: false
@@ -887,7 +862,8 @@ test('runs prechecks and finds that the IssueOps commands are valid with paramet
       octokit
     )
   ).toStrictEqual({
-    message: '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK',
+    message:
+      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK',
     ref: 'test-ref',
     status: true,
     sha: 'abc123'

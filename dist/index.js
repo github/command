@@ -10309,7 +10309,7 @@ async function prechecks(
 
     // If this Action's inputs have been configured to explicitly prevent forks, exit
     if (allowForks === false) {
-      message = `### ⚠️ Cannot proceed\n\nThis Action has been explicity configured to prevent operations from forks. You can change this via this Action's inputs if needed`
+      message = `### ⚠️ Cannot proceed with operation\n\nThis Action has been explicity configured to prevent operations from forks. You can change this via this Action's inputs if needed`
       return {message: message, status: false}
     }
 
@@ -10340,7 +10340,6 @@ async function prechecks(
                     repository(owner:$owner, name:$name) {
                         pullRequest(number:$number) {
                             reviewDecision
-                            mergeStateStatus
                             commits(last: 1) {
                                 nodes {
                                     commit {
@@ -10377,9 +10376,6 @@ async function prechecks(
     // Otherwise, grab the reviewDecision from the GraphQL result
     reviewDecision = result.repository.pullRequest.reviewDecision
   }
-
-  // Grab the mergeStateStatus from the GraphQL result
-  const mergeStateStatus = result.repository.pullRequest.mergeStateStatus
 
   // Grab the draft status
   const isDraft = pr.data.draft
@@ -10443,16 +10439,12 @@ async function prechecks(
   // log values for debugging
   core.debug('precheck values for debugging:')
   core.debug(`reviewDecision: ${reviewDecision}`)
-  core.debug(`mergeStateStatus: ${mergeStateStatus}`)
   core.debug(`commitStatus: ${commitStatus}`)
   core.debug(`userIsOperator: ${userIsOperator}`)
   core.debug(`skipCi: ${skipCi}`)
   core.debug(`skipReviews: ${skipReviews}`)
   core.debug(`allowForks: ${allowForks}`)
   core.debug(`forkBypass: ${forkBypass}`)
-
-  console.log(`reviewDecision: ${reviewDecision}`)
-  console.log(`commitStatus: ${commitStatus}`)
 
   if (isDraft && !allowDraftPRs) {
     message = `### ⚠️ Cannot proceed with operation\n\n> Your pull request is in a draft state`
@@ -10560,8 +10552,11 @@ async function prechecks(
   } else if (reviewDecision === null && commitStatus === 'PENDING') {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks must be passing in order to continue`
     return {message: message, status: false}
+
+    // If CI is undefined and the PR has not been reviewed
   } else if (reviewDecision === 'REVIEW_REQUIRED' && commitStatus === null) {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\``
+    return {message: message, status: false}
 
     // If CI checks are pending and the PR has not been reviewed
   } else if (
@@ -10570,7 +10565,7 @@ async function prechecks(
       reviewDecision === 'skip_reviews') &&
     commitStatus === 'PENDING'
   ) {
-    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks must be passing in order to continue`
+    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue`
     return {message: message, status: false}
 
     // If CI is passing but the PR is missing an approval, let the user know
