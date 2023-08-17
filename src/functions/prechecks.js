@@ -84,7 +84,6 @@ export async function prechecks(
                     repository(owner:$owner, name:$name) {
                         pullRequest(number:$number) {
                             reviewDecision
-                            mergeStateStatus
                             commits(last: 1) {
                                 nodes {
                                     commit {
@@ -121,9 +120,6 @@ export async function prechecks(
     // Otherwise, grab the reviewDecision from the GraphQL result
     reviewDecision = result.repository.pullRequest.reviewDecision
   }
-
-  // Grab the mergeStateStatus from the GraphQL result
-  const mergeStateStatus = result.repository.pullRequest.mergeStateStatus
 
   // Grab the draft status
   const isDraft = pr.data.draft
@@ -187,7 +183,6 @@ export async function prechecks(
   // log values for debugging
   core.debug('precheck values for debugging:')
   core.debug(`reviewDecision: ${reviewDecision}`)
-  core.debug(`mergeStateStatus: ${mergeStateStatus}`)
   core.debug(`commitStatus: ${commitStatus}`)
   core.debug(`userIsOperator: ${userIsOperator}`)
   core.debug(`skipCi: ${skipCi}`)
@@ -195,19 +190,7 @@ export async function prechecks(
   core.debug(`allowForks: ${allowForks}`)
   core.debug(`forkBypass: ${forkBypass}`)
 
-  if (
-    (commitStatus === 'SUCCESS' ||
-      commitStatus === null ||
-      commitStatus == 'skip_ci') &&
-    (reviewDecision === 'APPROVED' ||
-      reviewDecision === null ||
-      reviewDecision === 'skip_reviews')
-  ) {
-    // Execute the logic below only if update_branch is set to "force"
-    core.info(`ci and review checks are passing - OK`)
-
-    // If the PR is a draft and draft PRs are not allowed, let the user know
-  } else if (isDraft && !allowDraftPRs) {
+  if (isDraft && !allowDraftPRs) {
     message = `### ⚠️ Cannot proceed with operation\n\n> Your pull request is in a draft state`
     return {message: message, status: false}
 
@@ -231,7 +214,7 @@ export async function prechecks(
     // CI checks are passing and reviews are set to be bypassed
   } else if (commitStatus === 'SUCCESS' && reviewDecision == 'skip_reviews') {
     message =
-      '✔️ CI checked passsed and required reviewers have been disabled for this environment - OK'
+      '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK'
     core.info(message)
 
     // CI checks are set to be bypassed and the pull request is approved
@@ -249,7 +232,8 @@ export async function prechecks(
     // CI checks are set to be bypassed and the PR has not been reviewed
   } else if (
     commitStatus === 'skip_ci' &&
-    reviewDecision === 'REVIEW_REQUIRED'
+    reviewDecision === 'REVIEW_REQUIRED' &&
+    userIsOperator === false
   ) {
     message = `⚠️ CI checks are not required for this operation but the PR has not been reviewed`
     return {message: message, status: false}
@@ -264,11 +248,20 @@ export async function prechecks(
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'skip_reviews') {
     message = '✔️ CI and PR reviewers are not required for this operation - OK'
     core.info(message)
+  } else if (
+    reviewDecision == 'REVIEW_REQUIRED' &&
+    commitStatus === 'SUCCESS' &&
+    userIsOperator === true
+  ) {
+    message =
+      '✔️ CI is passing and approval is bypassed due to allowed operator rights - OK'
+    core.info(message)
 
-    // If CI is passing but the PR has not been reviewed
+    // If CI is passing but the PR has not been reviewed and it is not an allowed operator
   } else if (
     reviewDecision === 'REVIEW_REQUIRED' &&
-    commitStatus === 'SUCCESS'
+    commitStatus === 'SUCCESS' &&
+    userIsOperator === false
   ) {
     message = '⚠️ CI checks are passing but the PR has not been reviewed'
     return {message: message, status: false}
@@ -303,8 +296,11 @@ export async function prechecks(
   } else if (reviewDecision === null && commitStatus === 'PENDING') {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks must be passing in order to continue`
     return {message: message, status: false}
+
+    // If CI is undefined and the PR has not been reviewed
   } else if (reviewDecision === 'REVIEW_REQUIRED' && commitStatus === null) {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\``
+    return {message: message, status: false}
 
     // If CI checks are pending and the PR has not been reviewed
   } else if (
