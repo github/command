@@ -8,7 +8,7 @@ import {stringToArray} from './string-to-array'
 export async function validPermissions(octokit, context) {
   // fetch the defined permissions from the Action input
   const validPermissionsArray = await stringToArray(
-    core.getInput('permissions')
+    core.getInput('permissions', {required: true})
   )
 
   core.setOutput('actor', context.actor)

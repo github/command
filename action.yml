@@ -21,9 +21,9 @@ inputs:
     required: true
     default: "eyes"
   allowed_contexts:
-    description: 'A comma separated list of GitHub contexts that are allowed to trigger this IssueOps command'
+    description: 'A comma separated list of comment contexts that are allowed to trigger this IssueOps command. Pull requests and issues are the only currently supported contexts'
     required: true
-    default: "pull_request,issue_comment"
+    default: "pull_request,issue"
   permissions:
     description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
     required: true
