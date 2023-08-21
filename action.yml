@@ -20,6 +20,10 @@ inputs:
     description: 'If set, the specified emoji "reaction" is put on the comment to indicate that the trigger was detected. For example, "rocket" or "eyes"'
     required: true
     default: "eyes"
+  allowed_contexts:
+    description: 'A comma separated list of GitHub contexts that are allowed to trigger this IssueOps command'
+    required: true
+    default: "pull_request,issue_comment"
   permissions:
     description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
     required: true
