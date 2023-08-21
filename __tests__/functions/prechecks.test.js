@@ -770,7 +770,6 @@ test('runs prechecks and finds the skip_ci is set and reviews are not required',
   })
 })
 
-
 test('runs prechecks and finds the PR is a DRAFT PR', async () => {
   octokit.graphql = jest.fn().mockReturnValue({
     repository: {

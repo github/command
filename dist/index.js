@@ -12713,13 +12713,13 @@ const rocket = 'rocket'
 // Alt success reaction
 const thumbsUp = '+1'
 
-// Helper function to add a status update for the action that is running a branch deployment
-// It also updates the original comment with a reaction depending on the status of the deployment
+// Helper function to add a status update for the action that is running an IssueOps command
+// It also updates the original comment with a reaction depending on the status of the operation
 // :param context: The context of the action
 // :param octokit: The octokit object
 // :param reactionId: The id of the original reaction added to our trigger comment (Integer)
 // :param message: The message to be added to the action status (String)
-// :param success: Boolean indicating whether the deployment was successful (Boolean)
+// :param success: Boolean indicating whether the operation was successful (Boolean)
 // :param altSuccessReaction: Boolean indicating whether to use the alternate success reaction (Boolean)
 // :returns: Nothing
 async function actionStatus(
@@ -13407,10 +13407,10 @@ async function post() {
 
 
 
-// :returns: 'success', 'success - noop', 'success - merge deploy mode', 'failure', 'safe-exit', 'success - unlock on merge mode' or raises an error
+// :returns: 'success', 'failure', 'safe-exit' or raises an error
 async function run() {
   try {
-    // Get the inputs for the branch-deploy Action
+    // Get the inputs for the 'command' Action
     const command = core.getInput('command', {required: true})
     const reaction = core.getInput('reaction')
     const token = core.getInput('github_token', {required: true})
@@ -13420,25 +13420,25 @@ async function run() {
     const skipReviews = core.getBooleanInput('skip_reviews')
     const param_separator = core.getInput('param_separator')
 
-    // Create an octokit client with the retry plugin
+    // create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
       additionalPlugins: [dist_node.octokitRetry]
     })
 
-    // Set the state so that the post run logic will trigger
+    // set the state so that the post run logic will trigger
     core.saveState('isPost', 'true')
     core.saveState('actionsToken', token)
 
-    // Get the body of the IssueOps command
+    // get the body of the IssueOps command
     const body = github.context.payload.comment.body.trim()
 
-    // Check the context of the event to ensure it is valid, return if it is not
+    // check the context of the event to ensure it is valid, return if it is not
     if (!(await contextCheck(github.context))) {
       core.saveState('bypass', 'true')
       return 'safe-exit'
     }
 
-    // Get variables from the event context
+    // get variables from the event context
     const issue_number = github.context.payload.issue.number
     core.setOutput('issue_number', issue_number)
 
@@ -13451,10 +13451,10 @@ async function run() {
       return 'safe-exit'
     }
 
-    // If we made it this far, the action has been triggered in one manner or another
+    // if we made it this far, the action has been triggered in one manner or another
     core.setOutput('triggered', 'true')
 
-    // Add the reaction to the issue_comment which triggered the Action
+    // add the reaction to the issue_comment which triggered the Action
     const reactRes = await reactEmote(reaction, github.context, octokit)
     core.setOutput('comment_id', github.context.payload.comment.id)
     core.saveState('comment_id', github.context.payload.comment.id)
@@ -13462,13 +13462,15 @@ async function run() {
     core.saveState('reaction_id', reactRes.data.id)
     core.setOutput('actor_handle', github.context.payload.comment.user.login)
 
-    // Check if the default environment is being overwritten by an explicit environment
-    const params = await parameters(
+    // check if any parameters were used in the command
+    // note: this function does have a return, but we don't care about it...
+    // ... we just care that it sets the output variables
+    await parameters(
       body, // comment body
       param_separator // param_separator action input
     )
 
-    // Execute prechecks to ensure the Action can proceed
+    // execute prechecks to ensure the Action can proceed
     const precheckResults = await prechecks(
       issue_number,
       allowForks,
@@ -13482,7 +13484,7 @@ async function run() {
     core.saveState('ref', precheckResults.ref)
     core.setOutput('sha', precheckResults.sha)
 
-    // If the prechecks failed, run the actionStatus function and return
+    // if the prechecks failed, run the actionStatus function and return
     // note: if we don't pass in the 'success' bool, actionStatus will default to failure mode
     if (!precheckResults.status) {
       await actionStatus(
@@ -13491,7 +13493,7 @@ async function run() {
         reactRes.data.id, // original reaction id
         precheckResults.message // message
       )
-      // Set the bypass state to true so that the post run logic will not run
+      // set the bypass state to true so that the post run logic will not run
       core.saveState('bypass', 'true')
       core.setFailed(precheckResults.message)
       return 'failure'
