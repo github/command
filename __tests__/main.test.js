@@ -22,7 +22,7 @@ beforeEach(() => {
   jest.spyOn(core, 'warning').mockImplementation(() => {})
   jest.spyOn(core, 'error').mockImplementation(() => {})
   process.env.INPUT_GITHUB_TOKEN = 'faketoken'
-  process.env.INPUT_COMMAND = '.deploy'
+  process.env.INPUT_COMMAND = '.test'
   process.env.INPUT_REACTION = 'eyes'
   process.env.INPUT_PARAM_SEPARATOR = '|'
   process.env.INPUT_REQUIRED_CONTEXTS = 'false'
@@ -36,7 +36,7 @@ beforeEach(() => {
       number: 123
     },
     comment: {
-      body: '.deploy',
+      body: '.test',
       id: 123,
       user: {
         login: 'monalisa'
@@ -50,16 +50,6 @@ beforeEach(() => {
         issues: {
           createComment: jest.fn().mockReturnValueOnce({
             data: {}
-          })
-        },
-        repos: {
-          createDeployment: jest.fn().mockImplementation(() => {
-            return {
-              data: {id: 123}
-            }
-          }),
-          createDeploymentStatus: jest.fn().mockImplementation(() => {
-            return {data: {}}
           })
         },
         pulls: {
@@ -88,7 +78,7 @@ beforeEach(() => {
 
 test('successfully runs the action', async () => {
   expect(await run()).toBe('success')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.deploy')
+  expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.test')
   expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
   expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
   expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
@@ -101,7 +91,7 @@ test('successfully runs the action', async () => {
 })
 
 test('successfully runs the action with parameters', async () => {
-  const body = '.deploy | test1 test2 --vm-size=chonky'
+  const body = '.test | test1 test2 --vm-size=chonky'
   github.context.payload.comment.body = body
   process.env.INPUT_COMMAND = body
   expect(await run()).toBe('success')
@@ -121,9 +111,11 @@ test('successfully runs the action with parameters', async () => {
 })
 
 test('successfully runs the action after trimming the body', async () => {
-  const body = '.deploy    \n\t\n   '
+  const body = '.test    \n\t\n   '
+  github.context.payload.comment.body = body
+  process.env.INPUT_COMMAND = body
   expect(await run()).toBe('success')
-  expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.deploy')
+  expect(setOutputMock).toHaveBeenCalledWith('comment_body', '.test')
   expect(setOutputMock).toHaveBeenCalledWith('triggered', 'true')
   expect(setOutputMock).toHaveBeenCalledWith('comment_id', 123)
   expect(setOutputMock).toHaveBeenCalledWith('ref', 'test-ref')
@@ -155,7 +147,7 @@ test('fails prechecks', async () => {
     return {
       ref: 'test-ref',
       status: false,
-      message: '### ⚠️ Cannot proceed with deployment... something went wrong',
+      message: '### ⚠️ Cannot proceed with operation... something went wrong',
       noopMode: false
     }
   })
@@ -165,6 +157,6 @@ test('fails prechecks', async () => {
   expect(await run()).toBe('failure')
   expect(saveStateMock).toHaveBeenCalledWith('bypass', 'true')
   expect(setFailedMock).toHaveBeenCalledWith(
-    '### ⚠️ Cannot proceed with deployment... something went wrong'
+    '### ⚠️ Cannot proceed with operation... something went wrong'
   )
 })
