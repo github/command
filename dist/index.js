@@ -13038,6 +13038,7 @@ async function isAllowed(context) {
 // :param skipCi: Boolean which defines whether CI checks should be skipped or not
 // :param skipReviews: Boolean which defines whether PR reviews should be skipped or not
 // :param allowDraftPRs: Boolean which defines whether draft PRs should be allowed or not
+// :param contextType: The type of context (issue or pull_request)
 // :param context: The context of the event
 // :param octokit: The octokit client
 // :returns: An object that contains the results of the prechecks, message, ref, and status
@@ -13047,6 +13048,7 @@ async function prechecks(
   skipCi,
   skipReviews,
   allowDraftPRs,
+  contextType,
   context,
   octokit
 ) {
@@ -13057,6 +13059,14 @@ async function prechecks(
   const validPermissionsRes = await validPermissions(octokit, context)
   if (validPermissionsRes !== true) {
     return {message: validPermissionsRes, status: false}
+  }
+
+  // if this is an issue comment, we can skip all the logic below here as it...
+  // ... only applies to pull requests
+  if (contextType === 'issue') {
+    message = '✔️ operation requested on an issue - OK'
+    core.info(message)
+    return {message: message, status: true, ref: null, sha: null}
   }
 
   // Get the PR data
@@ -13390,7 +13400,8 @@ async function post() {
     }
 
     // Check the context of the event to ensure it is valid, return if it is not
-    if (!(await contextCheck(github.context))) {
+    const contextCheckResults = await contextCheck(github.context)
+    if (!contextCheckResults.valid) {
       return
     }
 
@@ -13470,8 +13481,8 @@ async function run() {
     const body = github.context.payload.comment.body.trim()
 
     // check the context of the event to ensure it is valid, return if it is not
-    if (!(await contextCheck(github.context))) {
-      core.saveState('bypass', 'true')
+    const contextCheckResults = await contextCheck(github.context)
+    if (!contextCheckResults.valid) {
       return 'safe-exit'
     }
 
@@ -13514,11 +13525,11 @@ async function run() {
       skipCi,
       skipReviews,
       allow_drafts,
+      contextCheckResults.context,
       github.context,
       octokit
     )
     core.setOutput('ref', precheckResults.ref)
-    core.saveState('ref', precheckResults.ref)
     core.setOutput('sha', precheckResults.sha)
 
     // if the prechecks failed, run the actionStatus function and return

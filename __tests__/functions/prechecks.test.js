@@ -162,14 +162,14 @@ test('runs prechecks and fails due to a bad pull request', async () => {
   octokit.rest.pulls.get = jest.fn().mockReturnValueOnce({status: 500})
   expect(
     await prechecks(
-    '123',
-    true,
-    false,
-    false,
-    false,
-    defaultContextType, // contextType
-    context,
-    octokit
+      '123',
+      true,
+      false,
+      false,
+      false,
+      defaultContextType, // contextType
+      context,
+      octokit
     )
   ).toStrictEqual({
     message: 'Could not retrieve PR info: 500',
@@ -835,14 +835,14 @@ test('runs prechecks and finds the PR is a DRAFT PR', async () => {
 
   expect(
     await prechecks(
-    '123',
-    true, // allow forks
-    false, // skip_ci
-    false, // skip_reviews
-    false, // allow_drafts input option
-    defaultContextType, // contextType
-    context,
-    octokit
+      '123',
+      true, // allow forks
+      false, // skip_ci
+      false, // skip_reviews
+      false, // allow_drafts input option
+      defaultContextType, // contextType
+      context,
+      octokit
     )
   ).toStrictEqual({
     message:

@@ -26,7 +26,7 @@ export async function post() {
 
     // Check the context of the event to ensure it is valid, return if it is not
     const contextCheckResults = await contextCheck(context)
-    if (!(contextCheckResults.valid)) {
+    if (!contextCheckResults.valid) {
       return
     }
 
