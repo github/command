@@ -442,7 +442,7 @@ test('runs prechecks and finds CI is pending and the PR has not been reviewed', 
     )
   ).toStrictEqual({
     message:
-      '### ⚠️ Cannot proceed with operation\n\n- reviewDecision: `REVIEW_REQUIRED`\n- commitStatus: `PENDING`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue',
+      '### ⚠️ Cannot proceed with operation\n\n- reviewDecision: `REVIEW_REQUIRED`\n- commitStatus: `PENDING`\n\n> CI is still in a pending state and reviews are also required for this operation',
     status: false
   })
 })
@@ -590,7 +590,7 @@ test('runs prechecks and finds CI checked have not been defined and the PR has n
       octokit
     )
   ).toStrictEqual({
-    message: `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`REVIEW_REQUIRED\`\n- commitStatus: \`null\``,
+    message: `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`REVIEW_REQUIRED\`\n- commitStatus: \`null\`\n\n> CI checks have not been defined but reviews are required for this operation`,
     status: false
   })
 })
@@ -999,43 +999,6 @@ test('runs prechecks and finds that no CI checks exist but reviews are defined',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
-  })
-})
-
-test('runs prechecks and finds that no CI checks exist and the PR is not approved', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'REVIEW_REQUIRED',
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 0
-                },
-                statusCheckRollup: null
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
-  expect(
-    await prechecks(
-      '123',
-      true, // allow forks
-      false, // skip_ci
-      false, // skip_reviews
-      false, // allow_drafts
-      defaultContextType, // contextType
-      context,
-      octokit
-    )
-  ).toStrictEqual({
-    message: `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`REVIEW_REQUIRED\`\n- commitStatus: \`null\``,
-    status: false
   })
 })
 

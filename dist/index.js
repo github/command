@@ -13303,7 +13303,7 @@ async function prechecks(
     reviewDecision === 'REVIEW_REQUIRED' &&
     commitStatus === 'PENDING'
   ) {
-    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue`
+    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI is still in a pending state and reviews are also required for this operation`
     return {message: message, status: false}
 
     // If CI is pending and reviewers have not been defined
@@ -13313,7 +13313,7 @@ async function prechecks(
 
     // If CI is undefined and the PR has not been reviewed
   } else if (reviewDecision === 'REVIEW_REQUIRED' && commitStatus === null) {
-    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\``
+    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks have not been defined but reviews are required for this operation`
     return {message: message, status: false}
 
     // If CI checks are pending and the PR has not been reviewed
