@@ -136,7 +136,7 @@ export async function prechecks(
   // Grab the statusCheckRollup state from the GraphQL result
   var commitStatus
   try {
-    // Check to see if skipCi is set for the environment being used
+    // Check to see if skipCi is set
     if (skipCi) {
       core.info(
         `✔️ CI checks are not required for this operation - proceeding - OK`

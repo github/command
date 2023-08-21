@@ -53,7 +53,7 @@ inputs:
     required: false
     default: "false"
   skip_completing:
-    description: 'If set to "true", skip the process of completing a deployment. You must manually create a deployment status after the deployment is complete. Default is "false"'
+    description: 'If set to "true", skip the process of completing the Action. This is useful if you want to customize the way this Action completes - For example, custom reactions, comments, etc'
     required: true
     default: "false"
 outputs:

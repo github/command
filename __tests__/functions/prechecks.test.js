@@ -770,35 +770,6 @@ test('runs prechecks and finds the skip_ci is set and reviews are not required',
   })
 })
 
-test('runs prechecks and finds the PR is approved and CI checks have NOT been defined and NOT a noop deploy', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'APPROVED'
-      }
-    }
-  })
-  expect(
-    await prechecks(
-      '123',
-      true,
-      false,
-      false,
-      false,
-
-      context,
-      octokit
-    )
-  ).toStrictEqual({
-    message:
-      '✔️ CI checks have not been defined but the PR has been approved - OK',
-    status: true,
-
-    ref: 'test-ref',
-    sha: 'abc123'
-  })
-})
-
 test('runs prechecks and finds the PR is a DRAFT PR', async () => {
   octokit.graphql = jest.fn().mockReturnValue({
     repository: {

@@ -41,7 +41,7 @@ beforeEach(() => {
   }
 })
 
-test('adds a successful status message for a deployment', async () => {
+test('adds a successful status message for an operation', async () => {
   expect(
     await actionStatus(context, octokit, 123, 'Everything worked!', true)
   ).toBe(undefined)
@@ -65,7 +65,7 @@ test('adds a successful status message for a deployment', async () => {
   })
 })
 
-test('adds a successful status message for a deployment (with alt message)', async () => {
+test('adds a successful status message for an operation (with alt message)', async () => {
   expect(
     await actionStatus(context, octokit, 123, 'Everything worked!', true, true)
   ).toBe(undefined)
@@ -89,7 +89,7 @@ test('adds a successful status message for a deployment (with alt message)', asy
   })
 })
 
-test('adds a failure status message for a deployment', async () => {
+test('adds a failure status message for an operation', async () => {
   expect(
     await actionStatus(context, octokit, 123, 'Everything failed!', false)
   ).toBe(undefined)
