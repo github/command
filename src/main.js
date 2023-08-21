@@ -66,6 +66,8 @@ export async function run() {
     core.setOutput('actor_handle', context.payload.comment.user.login)
 
     // check if any parameters were used in the command
+    // note: this function does have a return, but we don't care about it...
+    // ... we just care that it sets the output variables
     await parameters(
       body, // comment body
       param_separator // param_separator action input
