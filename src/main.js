@@ -65,8 +65,8 @@ export async function run() {
     core.saveState('reaction_id', reactRes.data.id)
     core.setOutput('actor_handle', context.payload.comment.user.login)
 
-    // Check if the default environment is being overwritten by an explicit environment
-    const params = await parameters(
+    // check if any parameters were used in the command
+    await parameters(
       body, // comment body
       param_separator // param_separator action input
     )
