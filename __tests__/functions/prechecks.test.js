@@ -5,6 +5,7 @@ import * as core from '@actions/core'
 
 // Globals for testing
 const infoMock = jest.spyOn(core, 'info')
+const defaultContextType = 'pull_request'
 
 var context
 var octokit
@@ -83,7 +84,7 @@ beforeEach(() => {
   }
 })
 
-test('runs prechecks and finds that the IssueOps command is valid for a branch operation', async () => {
+test('runs prechecks and finds that the IssueOps command is valid', async () => {
   expect(
     await prechecks(
       '123', // issue_number
@@ -91,6 +92,7 @@ test('runs prechecks and finds that the IssueOps command is valid for a branch o
       false, // skipCi
       false, // skipReviews
       false, // allowDraftPRs
+      defaultContextType, // contextType
       context, // context
       octokit // octokit
     )
@@ -102,14 +104,23 @@ test('runs prechecks and finds that the IssueOps command is valid for a branch o
   })
 })
 
-test('runs prechecks and finds that the IssueOps command is valid for a noop operation', async () => {
+test('runs prechecks and finds that the IssueOps command is valid and exits early because the command came from an issue and not a pr', async () => {
   expect(
-    await prechecks('123', true, false, false, false, context, octokit)
+    await prechecks(
+      '123', // issue_number
+      true, // allowForks
+      false, // skipCi
+      false, // skipReviews
+      false, // allowDraftPRs
+      'issue', // contextType
+      context, // context
+      octokit // octokit
+    )
   ).toStrictEqual({
-    message: '✔️ PR is approved and all CI checks passed - OK',
-    ref: 'test-ref',
+    message: '✔️ operation requested on an issue - OK',
+    ref: null,
     status: true,
-    sha: 'abc123'
+    sha: null
   })
 })
 
@@ -124,11 +135,11 @@ test('runs prechecks and finds that the IssueOps command is valid without define
   expect(
     await prechecks(
       '123',
-      true,
-      false,
-      false,
-      false,
-
+      true, // allowForks
+      false, // skip_ci
+      false, // skipReviews
+      false, // allowDraftPRs
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -136,7 +147,6 @@ test('runs prechecks and finds that the IssueOps command is valid without define
     message:
       '✔️ CI checks have not been defined but the PR has been approved - OK',
     status: true,
-
     ref: 'test-ref',
     sha: 'abc123'
   })
@@ -151,14 +161,21 @@ test('runs prechecks and finds that the IssueOps command is valid without define
 test('runs prechecks and fails due to a bad pull request', async () => {
   octokit.rest.pulls.get = jest.fn().mockReturnValueOnce({status: 500})
   expect(
-    await prechecks('123', true, false, false, false, context, octokit)
+    await prechecks(
+      '123',
+      true,
+      false,
+      false,
+      false,
+      defaultContextType, // contextType
+      context,
+      octokit
+    )
   ).toStrictEqual({
     message: 'Could not retrieve PR info: 500',
     status: false
   })
 })
-
-// Review checks and CI checks
 
 test('runs prechecks and finds that reviews and CI checks have not been defined', async () => {
   octokit.graphql = jest.fn().mockReturnValueOnce({
@@ -171,11 +188,11 @@ test('runs prechecks and finds that reviews and CI checks have not been defined'
   expect(
     await prechecks(
       '123',
-      true,
-      false,
-      false,
-      false,
-
+      true, // allowForks
+      false, // skip_ci
+      false, // skipReviews
+      false, // allowDraftPRs
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -223,11 +240,11 @@ test('runs prechecks and finds CI checks pass but reviews are not defined', asyn
   expect(
     await prechecks(
       '123',
-      true,
-      false,
-      false,
-      false,
-
+      true, // allowForks
+      false, // skip_ci
+      false, // skipReviews
+      false, // allowDraftPRs
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -235,7 +252,6 @@ test('runs prechecks and finds CI checks pass but reviews are not defined', asyn
     message:
       '⚠️ CI checks have been defined but required reviewers have not been defined... proceeding - OK',
     status: true,
-
     ref: 'test-ref',
     sha: 'abc123'
   })
@@ -274,6 +290,7 @@ test('runs prechecks and finds CI is passing and the PR has not been reviewed', 
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -321,11 +338,11 @@ test('runs prechecks and finds that the IssueOps command is valid for a branch o
   expect(
     await prechecks(
       '123',
-      true,
-      false,
-      false,
-      false,
-
+      true, // allow forks
+      false, // skip_ci
+      false, // skip_reviews
+      false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -379,6 +396,7 @@ test('runs prechecks and finds that the IssueOps command is on a PR from a forke
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -418,6 +436,7 @@ test('runs prechecks and finds CI is pending and the PR has not been reviewed', 
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -458,6 +477,7 @@ test('runs prechecks and finds CI is pending and the PR has not been reviewed bu
       false, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -498,6 +518,7 @@ test('runs prechecks and finds CI is failing and the PR has not been reviewed bu
       false, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -537,7 +558,7 @@ test('runs prechecks and finds CI is pending and reviewers have not been defined
       false,
       false,
       false,
-
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -564,6 +585,7 @@ test('runs prechecks and finds CI checked have not been defined and the PR has n
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -602,6 +624,7 @@ test('runs prechecks and finds the PR has been approved but CI checks are pendin
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -641,6 +664,7 @@ test('runs prechecks and finds CI is passing but the PR is missing an approval',
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -679,7 +703,7 @@ test('runs prechecks and finds the PR is approved but CI is failing', async () =
       false,
       false,
       false,
-
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -719,6 +743,7 @@ test('runs prechecks and finds the PR does not require approval but CI is failin
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -758,6 +783,7 @@ test('runs prechecks and finds the skip_ci is set and reviews are not required',
       true, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -808,7 +834,16 @@ test('runs prechecks and finds the PR is a DRAFT PR', async () => {
   })
 
   expect(
-    await prechecks('123', true, false, false, false, context, octokit)
+    await prechecks(
+      '123',
+      true, // allow forks
+      false, // skip_ci
+      false, // skip_reviews
+      false, // allow_drafts input option
+      defaultContextType, // contextType
+      context,
+      octokit
+    )
   ).toStrictEqual({
     message:
       '### ⚠️ Cannot proceed with operation\n\n> Your pull request is in a draft state',
@@ -860,6 +895,7 @@ test('runs prechecks and finds the PR is a DRAFT PR and drafts are allowed', asy
       false,
       false,
       true, // allow_drafts input option
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -904,7 +940,16 @@ test('runs prechecks and finds that no CI checks exist and reviews are not defin
     }
   })
   expect(
-    await prechecks('123', true, false, false, false, context, octokit)
+    await prechecks(
+      '123',
+      true,
+      false,
+      false,
+      false,
+      defaultContextType, // contextType
+      context,
+      octokit
+    )
   ).toStrictEqual({
     message:
       '⚠️ CI checks have not been defined and required reviewers have not been defined... proceeding - OK',
@@ -944,6 +989,7 @@ test('runs prechecks and finds that no CI checks exist but reviews are defined',
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -983,6 +1029,7 @@ test('runs prechecks and finds that no CI checks exist and the PR is not approve
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1020,6 +1067,7 @@ test('runs prechecks and finds that skip_ci is set and the PR has been approved'
       true, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1044,6 +1092,7 @@ test('runs prechecks and finds that the user is not an allowed operator', async 
       false, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1083,6 +1132,7 @@ test('runs prechecks and finds that skip_ci is set and no reviews are defined', 
       true, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1128,6 +1178,7 @@ test('runs prechecks and finds that skip_ci is set and skip_reviews is set', asy
       true, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1173,6 +1224,7 @@ test('runs prechecks and finds that skip_ci is set', async () => {
       true, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1213,6 +1265,7 @@ test('runs prechecks and finds that CI is pending and reviewers have not been de
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1252,6 +1305,7 @@ test('runs prechecks and finds that the PR is NOT reviewed and CI checks have be
       true, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context,
       octokit
     )
@@ -1293,6 +1347,7 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
       false, // skipCi
       false, // skipReviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context, // event context
       octokit // octokit instance
     )
@@ -1334,6 +1389,7 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
       false, // skipCi
       true, // skipReviews
       false, // allow_drafts
+      defaultContextType, // contextType
       context, // event context
       octokit // octokit instance
     )

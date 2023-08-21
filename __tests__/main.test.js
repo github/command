@@ -61,7 +61,7 @@ beforeEach(() => {
     }
   })
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
-    return true
+    return {valid: true, context: 'pull_request'}
   })
   jest.spyOn(reactEmote, 'reactEmote').mockImplementation(() => {
     return {data: {id: '123'}}
@@ -87,7 +87,6 @@ test('successfully runs the action', async () => {
   expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
   expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
   expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
 })
 
 test('successfully runs the action with parameters', async () => {
@@ -107,7 +106,6 @@ test('successfully runs the action with parameters', async () => {
   expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
   expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
   expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
 })
 
 test('successfully runs the action after trimming the body', async () => {
@@ -124,12 +122,11 @@ test('successfully runs the action after trimming the body', async () => {
   expect(saveStateMock).toHaveBeenCalledWith('isPost', 'true')
   expect(saveStateMock).toHaveBeenCalledWith('actionsToken', 'faketoken')
   expect(saveStateMock).toHaveBeenCalledWith('comment_id', 123)
-  expect(saveStateMock).toHaveBeenCalledWith('ref', 'test-ref')
 })
 
 test('fails due to a bad context', async () => {
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
-    return false
+    return {valid: false, context: 'pull_request'}
   })
   expect(await run()).toBe('safe-exit')
 })

@@ -1,26 +1,63 @@
 import * as core from '@actions/core'
+import {stringToArray} from './string-to-array'
 
 // A simple function that checks the event context to make sure it is valid
 // :param context: The GitHub Actions event context
-// :returns: Boolean - true if the context is valid, false otherwise
+// :returns: Map - {valid: true/false, context: 'issue'/'pull_request'}
 export async function contextCheck(context) {
-  // Get the PR event context
-  var pr
-  try {
-    pr = context.payload.issue.pull_request
-  } catch (error) {
-    throw new Error(`Could not get PR event context: ${error}`)
-  }
+  core.debug(`checking if the context of '${context.eventName}' is valid`)
 
-  // If the context is not valid, return false
-  if (context.eventName !== 'issue_comment' || pr == null || pr == undefined) {
+  // exit right away if the event isn't a comment of some kind
+  // IssueOps commands by their very nature are comments
+  if (context.eventName !== 'issue_comment') {
     core.saveState('bypass', 'true')
     core.warning(
-      'This Action can only be run in the context of a pull request comment'
+      'this Action can only be run in the context of an issue_comment'
     )
-    return false
+    return {valid: false, context: context.eventName}
   }
 
-  // If the context is valid, return true
-  return true
+  // fetch the defined contexts from the Action input
+  const allowedContexts = await stringToArray(
+    core.getInput('allowed_contexts', {required: true})
+  )
+
+  // check if the event is a PR
+  const isPullRequest = context?.payload?.issue?.pull_request !== undefined
+
+  // if the only allowed context is 'pull_request' check if the context is valid
+  if (allowedContexts.length === 1 && allowedContexts[0] === 'pull_request') {
+    // if the context is not from a PR and it is an issue comment, that means it...
+    // ... came from an issue, so return false
+    if (!isPullRequest && context.eventName === 'issue_comment') {
+      core.saveState('bypass', 'true')
+      core.warning(
+        'this Action can only be run in the context of a pull request comment'
+      )
+      return {valid: false, context: context.eventName}
+    }
+
+    // if the only allowed context is 'issue_comment' check if the context is valid
+  } else if (allowedContexts.length === 1 && allowedContexts[0] === 'issue') {
+    // if the context is an issue comment, but that issue comment was on a PR, return false
+    // https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#issue_comment
+    if (context.eventName === 'issue_comment' && isPullRequest) {
+      core.saveState('bypass', 'true')
+      core.warning(
+        'this Action can only be run in the context of an issue comment'
+      )
+      return {valid: false, context: context.eventName}
+    }
+  }
+
+  // if we make it here, the context is valid, we just need to figure out if it is a...
+  // ... PR or an issue comment
+  var contextType
+  if (isPullRequest) {
+    contextType = 'pull_request'
+  } else {
+    contextType = 'issue'
+  }
+
+  return {valid: true, context: contextType}
 }

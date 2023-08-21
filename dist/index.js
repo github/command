@@ -12606,32 +12606,106 @@ async function triggerCheck(body, trigger) {
   return true
 }
 
+;// CONCATENATED MODULE: ./src/functions/string-to-array.js
+
+
+// Helper function to convert a String to an Array specifically in Actions
+// :param string: A comma seperated string to convert to an array
+// :return Array: The function returns an Array - can be empty
+async function stringToArray(string) {
+  try {
+    // If the String is empty, return an empty Array
+    if (string.trim() === '') {
+      core.debug(
+        'in stringToArray(), an empty String was found so an empty Array was returned'
+      )
+      return []
+    }
+
+    // Split up the String on commas, trim each element, and return the Array
+    const stringArray = string.split(',').map(target => target.trim())
+    var results = []
+
+    // filter out empty items
+    for (const item of stringArray) {
+      if (item === '') {
+        continue
+      }
+      results.push(item)
+    }
+
+    return results
+  } catch (error) {
+    /* istanbul ignore next */
+    core.error(`failed string for debugging purposes: ${string}`)
+    /* istanbul ignore next */
+    throw new Error(`could not convert String to Array - error: ${error}`)
+  }
+}
+
 ;// CONCATENATED MODULE: ./src/functions/context-check.js
+
 
 
 // A simple function that checks the event context to make sure it is valid
 // :param context: The GitHub Actions event context
-// :returns: Boolean - true if the context is valid, false otherwise
+// :returns: Map - {valid: true/false, context: 'issue'/'pull_request'}
 async function contextCheck(context) {
-  // Get the PR event context
-  var pr
-  try {
-    pr = context.payload.issue.pull_request
-  } catch (error) {
-    throw new Error(`Could not get PR event context: ${error}`)
-  }
+  core.debug(`checking if the context of '${context.eventName}' is valid`)
 
-  // If the context is not valid, return false
-  if (context.eventName !== 'issue_comment' || pr == null || pr == undefined) {
+  // exit right away if the event isn't a comment of some kind
+  // IssueOps commands by their very nature are comments
+  if (context.eventName !== 'issue_comment') {
     core.saveState('bypass', 'true')
     core.warning(
-      'This Action can only be run in the context of a pull request comment'
+      'this Action can only be run in the context of an issue_comment'
     )
-    return false
+    return {valid: false, context: context.eventName}
   }
 
-  // If the context is valid, return true
-  return true
+  // fetch the defined contexts from the Action input
+  const allowedContexts = await stringToArray(
+    core.getInput('allowed_contexts', {required: true})
+  )
+
+  // check if the event is a PR
+  const isPullRequest = context?.payload?.issue?.pull_request !== undefined
+
+  // if the only allowed context is 'pull_request' check if the context is valid
+  if (allowedContexts.length === 1 && allowedContexts[0] === 'pull_request') {
+    // if the context is not from a PR and it is an issue comment, that means it...
+    // ... came from an issue, so return false
+    if (!isPullRequest && context.eventName === 'issue_comment') {
+      core.saveState('bypass', 'true')
+      core.warning(
+        'this Action can only be run in the context of a pull request comment'
+      )
+      return {valid: false, context: context.eventName}
+    }
+
+    // if the only allowed context is 'issue_comment' check if the context is valid
+  } else if (allowedContexts.length === 1 && allowedContexts[0] === 'issue') {
+    // if the context is an issue comment, but that issue comment was on a PR, return false
+    // https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#issue_comment
+    if (context.eventName === 'issue_comment' && isPullRequest) {
+      core.saveState('bypass', 'true')
+      core.warning(
+        'this Action can only be run in the context of an issue comment'
+      )
+      return {valid: false, context: context.eventName}
+    }
+  }
+
+  // if we make it here, the context is valid, we just need to figure out if it is a...
+  // ... PR or an issue comment
+  var contextType
+  if (isPullRequest) {
+    contextType = 'pull_request'
+  } else {
+    contextType = 'issue'
+  }
+
+  return {valid: true, context: contextType}
 }
 
 ;// CONCATENATED MODULE: ./src/functions/react-emote.js
@@ -12770,43 +12844,6 @@ async function actionStatus(
   })
 }
 
-;// CONCATENATED MODULE: ./src/functions/string-to-array.js
-
-
-// Helper function to convert a String to an Array specifically in Actions
-// :param string: A comma seperated string to convert to an array
-// :return Array: The function returns an Array - can be empty
-async function stringToArray(string) {
-  try {
-    // If the String is empty, return an empty Array
-    if (string.trim() === '') {
-      core.debug(
-        'in stringToArray(), an empty String was found so an empty Array was returned'
-      )
-      return []
-    }
-
-    // Split up the String on commas, trim each element, and return the Array
-    const stringArray = string.split(',').map(target => target.trim())
-    var results = []
-
-    // filter out empty items
-    for (const item of stringArray) {
-      if (item === '') {
-        continue
-      }
-      results.push(item)
-    }
-
-    return results
-  } catch (error) {
-    /* istanbul ignore next */
-    core.error(`failed string for debugging purposes: ${string}`)
-    /* istanbul ignore next */
-    throw new Error(`could not convert String to Array - error: ${error}`)
-  }
-}
-
 ;// CONCATENATED MODULE: ./src/functions/valid-permissions.js
 
 
@@ -12818,7 +12855,7 @@ async function stringToArray(string) {
 async function validPermissions(octokit, context) {
   // fetch the defined permissions from the Action input
   const validPermissionsArray = await stringToArray(
-    core.getInput('permissions')
+    core.getInput('permissions', {required: true})
   )
 
   core.setOutput('actor', context.actor)
@@ -13001,6 +13038,7 @@ async function isAllowed(context) {
 // :param skipCi: Boolean which defines whether CI checks should be skipped or not
 // :param skipReviews: Boolean which defines whether PR reviews should be skipped or not
 // :param allowDraftPRs: Boolean which defines whether draft PRs should be allowed or not
+// :param contextType: The type of context (issue or pull_request)
 // :param context: The context of the event
 // :param octokit: The octokit client
 // :returns: An object that contains the results of the prechecks, message, ref, and status
@@ -13010,6 +13048,7 @@ async function prechecks(
   skipCi,
   skipReviews,
   allowDraftPRs,
+  contextType,
   context,
   octokit
 ) {
@@ -13020,6 +13059,14 @@ async function prechecks(
   const validPermissionsRes = await validPermissions(octokit, context)
   if (validPermissionsRes !== true) {
     return {message: validPermissionsRes, status: false}
+  }
+
+  // if this is an issue comment, we can skip all the logic below here as it...
+  // ... only applies to pull requests
+  if (contextType === 'issue') {
+    message = '✔️ operation requested on an issue - OK'
+    core.info(message)
+    return {message: message, status: true, ref: null, sha: null}
   }
 
   // Get the PR data
@@ -13353,7 +13400,8 @@ async function post() {
     }
 
     // Check the context of the event to ensure it is valid, return if it is not
-    if (!(await contextCheck(github.context))) {
+    const contextCheckResults = await contextCheck(github.context)
+    if (!contextCheckResults.valid) {
       return
     }
 
@@ -13433,8 +13481,8 @@ async function run() {
     const body = github.context.payload.comment.body.trim()
 
     // check the context of the event to ensure it is valid, return if it is not
-    if (!(await contextCheck(github.context))) {
-      core.saveState('bypass', 'true')
+    const contextCheckResults = await contextCheck(github.context)
+    if (!contextCheckResults.valid) {
       return 'safe-exit'
     }
 
@@ -13477,11 +13525,11 @@ async function run() {
       skipCi,
       skipReviews,
       allow_drafts,
+      contextCheckResults.context,
       github.context,
       octokit
     )
     core.setOutput('ref', precheckResults.ref)
-    core.saveState('ref', precheckResults.ref)
     core.setOutput('sha', precheckResults.sha)
 
     // if the prechecks failed, run the actionStatus function and return

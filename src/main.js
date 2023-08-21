@@ -36,8 +36,8 @@ export async function run() {
     const body = context.payload.comment.body.trim()
 
     // check the context of the event to ensure it is valid, return if it is not
-    if (!(await contextCheck(context))) {
-      core.saveState('bypass', 'true')
+    const contextCheckResults = await contextCheck(context)
+    if (!contextCheckResults.valid) {
       return 'safe-exit'
     }
 
@@ -80,11 +80,11 @@ export async function run() {
       skipCi,
       skipReviews,
       allow_drafts,
+      contextCheckResults.context,
       context,
       octokit
     )
     core.setOutput('ref', precheckResults.ref)
-    core.saveState('ref', precheckResults.ref)
     core.setOutput('sha', precheckResults.sha)
 
     // if the prechecks failed, run the actionStatus function and return
