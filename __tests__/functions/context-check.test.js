@@ -49,6 +49,15 @@ test('checks the event context for an issue comment and finds that it is valid -
   })
 })
 
+test('checks the event context and exits because bad input was used', async () => {
+  process.env.INPUT_ALLOWED_CONTEXTS = 'bad'
+  context.payload.issue = {}
+  expect(await contextCheck(context)).toStrictEqual({
+    valid: false,
+    context: 'issue_comment'
+  })
+})
+
 test('checks the event context for a pr comment and finds that it is valid - when only pr comments are allowed', async () => {
   process.env.INPUT_ALLOWED_CONTEXTS = 'pull_request'
   expect(await contextCheck(context)).toStrictEqual({

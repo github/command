@@ -1,6 +1,8 @@
 import * as core from '@actions/core'
 import {stringToArray} from './string-to-array'
 
+const contextDefaults = ['pull_request', 'issue']
+
 // A simple function that checks the event context to make sure it is valid
 // :param context: The GitHub Actions event context
 // :returns: Map - {valid: true/false, context: 'issue'/'pull_request'}
@@ -21,6 +23,17 @@ export async function contextCheck(context) {
   const allowedContexts = await stringToArray(
     core.getInput('allowed_contexts', {required: true})
   )
+
+  // check to see if the allowedContexts variable contains at least one item from the contextDefaults array
+  // if it does not, log a warning and exit
+  if (!allowedContexts.some(r => contextDefaults.includes(r))) {
+    core.warning(
+      `the 'allowed_contexts' input must contain at least one of the following: ${contextDefaults.join(
+        ', '
+      )}`
+    )
+    return {valid: false, context: context.eventName}
+  }
 
   // check if the event is a PR
   const isPullRequest = context?.payload?.issue?.pull_request !== undefined
