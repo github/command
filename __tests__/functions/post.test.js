@@ -35,7 +35,7 @@ beforeEach(() => {
     return validStates[name]
   })
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
-    return true
+    return {valid: true, context: 'pull_request'}
   })
 
   jest.spyOn(postReactions, 'postReactions').mockImplementation(() => {
@@ -59,7 +59,7 @@ test('successfully runs post() Action logic when "success" is false', async () =
 
 test('exits due to an invalid Actions context', async () => {
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
-    return false
+    return {valid: false, context: 'pull_request'}
   })
   expect(await post()).toBeUndefined()
 })

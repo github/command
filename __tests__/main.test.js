@@ -61,7 +61,7 @@ beforeEach(() => {
     }
   })
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
-    return true
+    return {valid: true, context: 'pull_request'}
   })
   jest.spyOn(reactEmote, 'reactEmote').mockImplementation(() => {
     return {data: {id: '123'}}
@@ -129,7 +129,7 @@ test('successfully runs the action after trimming the body', async () => {
 
 test('fails due to a bad context', async () => {
   jest.spyOn(contextCheck, 'contextCheck').mockImplementation(() => {
-    return false
+    return {valid: false, context: 'pull_request'}
   })
   expect(await run()).toBe('safe-exit')
 })
