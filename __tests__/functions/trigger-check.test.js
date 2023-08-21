@@ -34,7 +34,7 @@ test('checks a message and finds a global trigger', async () => {
   expect(await triggerCheck(body, trigger)).toBe(false)
 })
 
-test('checks a message and finds a trigger with an environment and a variable', async () => {
+test('checks a message and finds a trigger with extra text', async () => {
   const trigger = '.test'
   expect(await triggerCheck('.test dev something', trigger)).toBe(true)
   expect(setOutputMock).toHaveBeenCalledWith(
