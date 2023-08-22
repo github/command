@@ -49,6 +49,93 @@ Advanced usage with some custom configuration:
 
 For configuration details, see the [inputs](#inputs-) section below
 
+## About 💡
+
+Before we get into details, let's first define a few key terms below:
+
+- **IssueOps** - Its like ChatOps but instead of using a chat bot, commands are invoked by commenting on a pull request (PRs are issues under the hood) - Example: commenting `.restart` on a pull request
+- **PR** - Short for pull request
+
+### IssueOps 🗨️
+
+The best way to define IssueOps is to compare it to something similar, ChatOps. You may be familiar with the concept ChatOps already but in case you aren't here is a quick definition below:
+
+> ChatOps is the process of interacting with a chat bot to execute commands directly in a chat platform. For example, with ChatOps you might do something like `.ping example.org` to check the status of a website
+
+IssueOps adopts the same mindset but through a different medium. Rather than using a chat service to invoke the commands we use comments on a GitHub Issue or Pull Request. GitHub Actions is the runtime which executes our desired logic
+
+## How does it work? 📚
+
+> This section will go into detail about how this Action works and hopefully inspire you on ways you can leverage it in your own projects
+
+Let's walk through a GitHub Action workflow using this Action line by line:
+
+```yaml
+# The name of the workflow, it can be anything you wish
+name: "IssueOps github/command demo"
+
+# The workflow to execute on is comments that are newly created
+on:
+  issue_comment:
+    types: [created]
+```
+
+It is important to note that the workflow we want to run IssueOps on is `issue_comment` and `created`. This means we will not run under any other contexts for this workflow. You can edit this as you wish but it does change how this model ultimately works. For example, `issue_comment` workflows **only** use files found on `main` to run. If you do something like `on: pull_request` you could open yourself up to issues as a user could alter a file in a PR and exfil your secrets for example. Only using `issue_comment` is the suggested workflow type. It should also be noted that comments on pull requests, **and** issues will trigger the `issue_comment` workflow event.
+
+```yaml
+# permissions definitions
+permissions:
+  pull-requests: write # required for adding reactions to command comments on PRs
+  issues: write # required for adding reactions to command comments on issues
+  checks: read # required for checking if the CI checks have passed on a pull request (if using this Action in the context of PR comments)
+```
+
+These are the minimum permissions you need to run this Action (this assumes you are running this Action on pull requests and issues)
+
+```yaml
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout your projects repository
+      - uses: actions/checkout@v3
+```
+
+Sets up your `demo` job, uses an ubuntu runner, and checks out your repo - Just some standard setup for a general Action. We also add an `if:` statement here to only run this workflow on pull request comments to make it a little more specific (if necessary)
+
+> Note: The Action will check the context for us anyways but this can save us a bit of CI time by using the `if:` condition
+
+```yaml
+      # Execute IssueOps command logic, hooray!
+      - uses: github/command@vX.X.X
+        id: command
+        with:
+          command: ".ping"
+```
+
+> Note: It is important to set an `id:` for this job so we can reference its outputs in subsequent steps
+
+The core of this Action takes place here. This block of code will trigger the `github/command` action to run. It will do the following:
+
+1. Check the comment which invoked the workflow for the `command:` phrase (`.ping`) defined here
+2. If the command trigger phrase is found, it will proceed
+3. It will start by reacting to your message to let you know it is running
+4. The Action will check to ensure the user that invoked the operation has the correct permissions to run the command, collect any parameters used in the command, check CI / reviews (if run on a PR), etc
+5. Outputs will be exported by this job for later reference in other jobs as well
+
+```yaml
+      # conditionally run further steps if the command Action was successful
+      - name: ping
+        if: ${{ steps.command.outputs.continue == 'true' }}
+        run: echo "Do your custom logic here to ping your site!"
+```
+
+As seen above, we have a single example step. Perhaps you would actually use a real utility to ping a website, but for this example, we just echo out some text. This step is conditionally gated by the `continue` variable:
+
+- `steps.command.outputs.continue == 'true'` - The `continue` variable is only set to true when a workflow should continue - This is set by logic in the `github/command` Action
+
+> Example: You comment `.ping` on a pull request. A workflow is kicked off and the `github/command` Action begins to check the comment body of the message you just typed on the pull request. If you have the correct permissions to execute the IssueOps command, the action outputs the `continue` variable to `true`. This will allow the "ping" step seen above to run.
+
 ## Inputs 📥
 
 | Input | Required? | Default | Description |
@@ -85,3 +172,33 @@ For configuration details, see the [inputs](#inputs-) section below
 | `fork_label` | The API label field returned for the fork |
 | `fork_checkout` | The console command presented in the GitHub UI to checkout a given fork locally |
 | `fork_full_name` | The full name of the fork in "org/repo" format |
+
+## Allowlist 👩‍🔬
+
+TODO
+
+## Live Examples 📸
+
+Check out some of the links below to see how others are using this Action in their projects:
+
+- coming soon!
+
+## Suggestions 🌟
+
+This section will cover a few suggestions that will help you when using this Action
+
+1. Suggest Updating Pull Request Branches - A great setting to enable for pull request hygiene. This option can be found in your repository's `/settings` page
+
+    ![branch-setting](https://user-images.githubusercontent.com/23362539/172939811-a8816db8-8e7c-404a-b12a-11ec5bc6e93d.png)
+
+2. Enable Branch Protection Settings - It is always a good idea to enable branch protection settings for your repo, especially when using this Action
+
+## Security 🔒
+
+TODO link out to the `security-` section on the `branch-deploy` Readme
+
+## Contributing 💻
+
+All contributions are welcome from all!
+
+Check out the [contributing guide](CONTRIBUTING.md) to learn more
