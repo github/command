@@ -222,6 +222,22 @@ Check out some of the links below to see how others are using this Action in the
 
 - coming soon!
 
+## Actions Stability 🔧
+
+In order to ensure your usage of this action is stable, it is highly recommended that you use either pin your action to a SHA or use a specific release tag
+
+### Actions Tag Pinning
+
+You can easily select the exact version you want on the GitHub Actions marketplace seen in the screenshot below:
+
+![Screenshot from 2022-05-09 12-12-06](https://user-images.githubusercontent.com/23362539/167471509-71ca2cf9-7b8f-4709-acee-67a679869fa6.png)
+
+### Actions SHA Pinning
+
+You can also pin to an exact commit SHA as well using a third party tool such as [mheap/pin-github-action](https://github.com/mheap/pin-github-action)
+
+> GitHub Actions security hardening and stability docs available here: [docs](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
+
 ## Suggestions 🌟
 
 This section will cover a few suggestions that will help you when using this Action
@@ -235,6 +251,8 @@ This section will cover a few suggestions that will help you when using this Act
 ## Security 🔒
 
 TODO link out to the `security-` section on the `branch-deploy` Readme
+
+---
 
 ## Contributing 💻
 
