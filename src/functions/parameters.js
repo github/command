@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import {COLORS} from './colors'
 
 // Helper function that checks and returns params used in a command
 // :param body: The body of the comment
@@ -13,7 +14,7 @@ export async function parameters(body, param_separator = '|') {
   var paramsTrim = null
   if (params !== '') {
     paramsTrim = params.trim()
-    core.info(`detected parameters in command: '${paramsTrim}'`)
+    core.info(`🧮 detected parameters in command: ${COLORS.highlight}${paramsTrim}`)
     core.setOutput('params', paramsTrim)
   } else {
     core.debug('no parameters detected in command')
