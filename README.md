@@ -216,7 +216,34 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 
 ## Allowlist 👩‍🔬
 
-TODO
+This Action supports a configurable input called `allowlist` which can be used to specify a list of individual GitHub users or teams that should have permission to use this Action. By default, this input option's value is set to `"false"` which means that anyone how has the proper `permissions` (see [inputs](inputs-) section above) "permissions", will be able to invoke IssueOps commands. You can actually use both the `allowlist` and `permissions` input together to help control who can invoke IssueOps commands. For example, you could use these two options together to only allow people in the GitHub `octoawesome` team with `admin` permissions to run your commands.
+
+The `allowlist` input option takes a comma separated list of GitHub handles or GitHub org teams. For example, if you give the option `allowlist: monalisa`, the `monalisa` user will be the only user allowed to invoke IssueOps commands (assuming they also have the correct `permissions`)
+
+Here is a simple example using only handles below (the monalisa and octocat users will be allowlisted):
+
+```yaml
+- uses: github/command@vX.X.X
+  id: command
+  with:
+    allowlist: monalisa,octocat
+```
+
+Here is an example using a mix of GitHub handles and a GitHub org team below:
+
+```yaml
+- uses: github/command@vX.X.X
+  id: command
+  with:
+    allowlist: monalisa,octocat,octo-awesome-org/octo-awesome-team
+    allowlist_pat: ${{ secrets.ALLOWLIST_PAT }}
+```
+
+In this case, all users (and future users) in the `octo-awesome-org/octo-awesome-team` team will be treated as admins in addition to the monalisa and octocat users
+
+It should be noted if you choose to use GitHub org teams for allowlist definitions, you **will** need a [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with the `read:org` scope. This is because the Action will need to make API calls on behalf of an authenticated user in the org to retrieve team memberships. If you choose to only use GitHub handles for admin definitions, then the `allowlist_pat` input is not required
+
+> Note: You can read more about the `allowlist` option under the [inputs](inputs-) section in this readme
 
 ## Live Examples 📸
 
