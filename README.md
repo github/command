@@ -67,3 +67,21 @@ For configuration details, see the [inputs](#inputs-) section below
 | `allowlist` | `false` | `"false"` | A comma separated list of GitHub usernames or teams that should be allowed to use the IssueOps commands configured in this Action. If unset, then all users meeting the "permissions" requirement will be able to run commands. Example: `"monalisa,octocat,my-org/my-team"` |
 | `allowlist_pat` | `false` | `"false"` | A GitHub personal access token with "read:org" scopes. This is only needed if you are using the "allowlist" option with a GitHub org team. For example: `"my-org/my-team"` |
 | `skip_completing` | `true` | `"false"` | If set to `"true"`, skip the process of completing the Action. This is useful if you want to customize the way this Action completes - For example, custom reactions, comments, etc |
+
+## Outputs 📤
+
+| Output | Description |
+| ------ | ----------- |
+| `triggered` | The string "true" if the trigger was found, otherwise the string "false" - Just because the workflow was triggered does not mean it should continue. This is a step 1/2 check |
+| `continue` | ⭐ The string "true" if the workflow should continue, otherwise empty - Use this to conditionally control if your workflow should proceed or not. This is a step 2/2 check. This is the output you will want to use to determine if your IssueOps flow should _continue_ after this Action completes |
+| `comment_body` | The comment body |
+| `actor` | The GitHub handle of the actor that invoked the IssueOps command |
+| `params` | The raw parameters that were passed into the deployment command (see param_separator) - Further [documentation](docs/parameters.md) |
+| `comment_id` | The comment id which triggered this action |
+| `issue_number` | The issue number of the pull request (or issue) that was commented on |
+| `initial_reaction_id` | The reaction id for the initial reaction on the trigger comment |
+| `fork` | The string "true" if the pull request is a fork, otherwise "false" |
+| `fork_ref` | The true ref of the fork |
+| `fork_label` | The API label field returned for the fork |
+| `fork_checkout` | The console command presented in the GitHub UI to checkout a given fork locally |
+| `fork_full_name` | The full name of the fork in "org/repo" format |
