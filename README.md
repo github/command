@@ -49,6 +49,45 @@ Advanced usage with some custom configuration:
 
 For configuration details, see the [inputs](#inputs-) section below
 
+### Example 📚
+
+Check out a super simple workflow example using this Action to quickly get up and running with `github/command`:
+
+```yaml
+name: "command demo"
+
+# the workflow to execute on is comments that are newly created
+on:
+  issue_comment:
+    types: [created]
+
+# permissions needed for reacting to IssueOps commands on issues and PRs
+permissions:
+  pull-requests: write
+  issues: write
+  checks: read
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      # execute IssueOps command logic, hooray!
+      # this will be used to "gate" all future steps below
+      - uses: github/command@vX.X.X
+        id: command
+        with:
+          command: ".ping"
+
+      # run your custom logic for your project here - example seen below
+
+      # conditionally run some logic here
+      - name: ping
+        if: ${{ steps.command.outputs.continue == 'true' }}
+        run: echo "I am going to ping some cool website now!"
+```
+
+> Keep reading to learn more about this Action! Even further details about how this Action works can be found below as well
+
 ## About 💡
 
 Before we get into details, let's first define a few key terms below:
@@ -163,7 +202,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `continue` | ⭐ The string "true" if the workflow should continue, otherwise empty - Use this to conditionally control if your workflow should proceed or not. This is a step 2/2 check. This is the output you will want to use to determine if your IssueOps flow should _continue_ after this Action completes |
 | `comment_body` | The comment body |
 | `actor` | The GitHub handle of the actor that invoked the IssueOps command |
-| `params` | The raw parameters that were passed into the deployment command (see param_separator) - Further [documentation](docs/parameters.md) |
+| `params` | The raw parameters that were passed into the IssueOps command (see param_separator) - Further [documentation](docs/parameters.md) |
 | `comment_id` | The comment id which triggered this action |
 | `issue_number` | The issue number of the pull request (or issue) that was commented on |
 | `initial_reaction_id` | The reaction id for the initial reaction on the trigger comment |
