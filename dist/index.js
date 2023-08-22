@@ -12586,7 +12586,18 @@ var core = __nccwpck_require__(2186);
 var github = __nccwpck_require__(5438);
 // EXTERNAL MODULE: ./node_modules/@octokit/plugin-retry/dist-node/index.js
 var dist_node = __nccwpck_require__(6298);
+;// CONCATENATED MODULE: ./src/functions/colors.js
+const COLORS = {
+  highlight: '\u001b[35m', // magenta
+  info: '\u001b[34m', // blue
+  success: '\u001b[32m', // green
+  warning: '\u001b[33m', // yellow
+  error: '\u001b[31m', // red
+  reset: '\u001b[0m' // reset
+}
+
 ;// CONCATENATED MODULE: ./src/functions/trigger-check.js
+
 
 
 // A simple function that checks the body of the message against the trigger
@@ -12599,7 +12610,9 @@ async function triggerCheck(body, trigger) {
 
   // If the trigger is not activated, set the output to false and return with false
   if (!body.startsWith(trigger)) {
-    core.info(`Trigger "${trigger}" not found in the comment body`)
+    core.debug(
+      `trigger ${COLORS.highlight}${trigger}${COLORS.reset} not found in the comment body`
+    )
     return false
   }
 
@@ -12769,6 +12782,7 @@ async function reactEmote(reaction, context, octokit) {
 ;// CONCATENATED MODULE: ./src/functions/parameters.js
 
 
+
 // Helper function that checks and returns params used in a command
 // :param body: The body of the comment
 // :param param_separator: The separator used to seperate the command from the parameters
@@ -12782,7 +12796,9 @@ async function parameters(body, param_separator = '|') {
   var paramsTrim = null
   if (params !== '') {
     paramsTrim = params.trim()
-    core.info(`detected parameters in command: '${paramsTrim}'`)
+    core.info(
+      `🧮 detected parameters in command: ${COLORS.highlight}${paramsTrim}`
+    )
     core.setOutput('params', paramsTrim)
   } else {
     core.debug('no parameters detected in command')
@@ -13045,6 +13061,7 @@ async function isAllowed(context) {
 
 
 
+
 // Runs precheck logic before the IssueOps command can proceed
 // :param issue_number: The issue number of the event (String)
 // :param allowForks: Boolean which defines whether the Action can run from forks or not
@@ -13077,7 +13094,7 @@ async function prechecks(
   // if this is an issue comment, we can skip all the logic below here as it...
   // ... only applies to pull requests
   if (contextType === 'issue') {
-    message = '✔️ operation requested on an issue - OK'
+    message = `✅ operation requested on an ${COLORS.highlight}issue`
     core.info(message)
     return {message: message, status: true, ref: null, sha: null}
   }
@@ -13101,7 +13118,7 @@ async function prechecks(
   // Determine whether to use the ref or sha depending on if the PR is from a fork or not
   // Note: We should not export fork values if the stable_branch is being used here
   if (pr.data.head.repo?.fork === true && forkBypass === false) {
-    core.info(`PR is a fork`)
+    core.info(`🍴 the pull request is a ${COLORS.highlight}fork`)
     core.setOutput('fork', 'true')
 
     // If this Action's inputs have been configured to explicitly prevent forks, exit
@@ -13183,7 +13200,9 @@ async function prechecks(
       `operation requested on a draft PR when draft PRs are not allowed`
     )
   } else if (isDraft && allowDraftPRs) {
-    core.info(`operation requested on a draft PR - OK`)
+    core.info(
+      `📓 operation requested on a ${COLORS.highlight}draft${COLORS.reset} pull request`
+    )
   }
 
   // Grab the statusCheckRollup state from the GraphQL result
@@ -13192,7 +13211,7 @@ async function prechecks(
     // Check to see if skipCi is set
     if (skipCi) {
       core.info(
-        `✔️ CI checks are not required for this operation - proceeding - OK`
+        `✅ CI checks have been ${COLORS.highlight}disabled${COLORS.reset} for this operation`
       )
       commitStatus = 'skip_ci'
     }
@@ -13202,9 +13221,7 @@ async function prechecks(
       result.repository.pullRequest.commits.nodes[0].commit.checkSuites
         .totalCount === 0
     ) {
-      core.info(
-        'no CI checks have been defined for this pull request, proceeding - OK'
-      )
+      core.info('💡 no CI checks have been defined for this pull request')
       commitStatus = null
 
       // If there are CI checked defined, we need to check for the 'state' of the latest commit
@@ -13214,8 +13231,9 @@ async function prechecks(
           .state
     }
   } catch (e) {
-    core.info(`Could not retrieve PR commit status: ${e} - Handled: OK`)
-    core.info('Skipping commit status check and proceeding...')
+    core.debug(`could not retrieve PR commit status: ${e} - Handled: OK`)
+    core.debug('this repo may not have any CI checks defined')
+    core.debug('skipping commit status check and proceeding...')
     commitStatus = null
 
     // Try to display the raw GraphQL result for debugging purposes
@@ -13251,37 +13269,36 @@ async function prechecks(
 
     // If everything is OK, print a nice message
   } else if (reviewDecision === 'APPROVED' && commitStatus === 'SUCCESS') {
-    message = '✔️ PR is approved and all CI checks passed - OK'
+    message = '✅ PR is approved and all CI checks passed'
     core.info(message)
 
     // CI checks have not been defined AND required reviewers have not been defined
   } else if (reviewDecision === null && commitStatus === null) {
     message =
-      '⚠️ CI checks have not been defined and required reviewers have not been defined... proceeding - OK'
+      '🎛️ CI checks have not been defined and required reviewers have not been defined'
     core.info(message)
 
-    // CI checks have been defined BUT required reviewers have not been defined
+    // CI checks are passing and the reviewers is undefined
   } else if (reviewDecision === null && commitStatus === 'SUCCESS') {
-    message =
-      '⚠️ CI checks have been defined but required reviewers have not been defined... proceeding - OK'
+    message = '✅ CI checks are passing and reviews are not defined'
     core.info(message)
 
     // CI checks are passing and reviews are set to be bypassed
   } else if (commitStatus === 'SUCCESS' && reviewDecision == 'skip_reviews') {
     message =
-      '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK'
+      '✅ CI checks are passing and reviews have been disabled for this operation'
     core.info(message)
 
     // CI checks are set to be bypassed and the pull request is approved
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'APPROVED') {
     message =
-      '✔️ CI requirements have been disabled for this operation and the PR has been approved - OK'
+      '✅ CI requirements have been disabled for this operation and the PR has been approved'
     core.info(message)
 
-    // CI checks are set to be bypassed BUT required reviews have not been defined
+    // CI checks are set to be bypassed and reviews are undefined
   } else if (commitStatus === 'skip_ci' && reviewDecision === null) {
     message =
-      '⚠️ CI requirements have been disabled for this operation and required reviewers have not been defined... proceeding - OK'
+      '✅ CI requirements have been disabled for this operation and reviews are not required'
     core.info(message)
 
     // CI checks are set to be bypassed and the PR has not been reviewed
@@ -13289,12 +13306,12 @@ async function prechecks(
     commitStatus === 'skip_ci' &&
     reviewDecision === 'REVIEW_REQUIRED'
   ) {
-    message = `⚠️ CI checks are not required for this operation but the PR has not been reviewed`
+    message = `### ⚠️ Cannot proceed with operation\n\n> CI checks are not required for this operation but the PR has not been reviewed`
     return {message: message, status: false}
 
     // If CI checks are set to be bypassed and PR reviews are also set to by bypassed
   } else if (commitStatus === 'skip_ci' && reviewDecision === 'skip_reviews') {
-    message = '✔️ CI and PR reviewers are not required for this operation - OK'
+    message = '✅ CI and PR reviewers are not required for this operation'
     core.info(message)
 
     // If CI is passing but the PR has not been reviewed
@@ -13302,13 +13319,12 @@ async function prechecks(
     reviewDecision === 'REVIEW_REQUIRED' &&
     commitStatus === 'SUCCESS'
   ) {
-    message = '⚠️ CI checks are passing but the PR has not been reviewed'
+    message = `### ⚠️ Cannot proceed with operation\n\n> CI checks are passing but the PR has not been reviewed`
     return {message: message, status: false}
 
     // If CI has not been defined but the PR has been approved
   } else if (commitStatus === null && reviewDecision === 'APPROVED') {
-    message =
-      '✔️ CI checks have not been defined but the PR has been approved - OK'
+    message = '✅ CI checks have not been defined but the PR has been approved'
     core.info(message)
 
     // If CI is pending and the PR has not been reviewed
@@ -13420,7 +13436,7 @@ async function post() {
 
     // if skip_completing is set, return
     if (skip_completing === 'true') {
-      core.info('skip_completing set, exiting')
+      core.info('⏩ skip_completing set, exiting')
       return
     }
 
@@ -13456,6 +13472,7 @@ async function post() {
 }
 
 ;// CONCATENATED MODULE: ./src/main.js
+
 
 
 
@@ -13508,7 +13525,7 @@ async function run() {
       // if the comment does not contain the command, exit
       core.saveState('bypass', 'true')
       core.setOutput('triggered', 'false')
-      core.info('no command detected in comment - exiting')
+      core.info('⛔ no command detected in comment')
       return 'safe-exit'
     }
 
@@ -13561,6 +13578,7 @@ async function run() {
     }
 
     core.setOutput('continue', 'true')
+    core.info(`🚀 ${COLORS.success}success!`)
     return 'success'
   } catch (error) {
     /* istanbul ignore next */

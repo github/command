@@ -134,9 +134,7 @@ test('fails due to a bad context', async () => {
 test('fails due to no trigger being found', async () => {
   process.env.INPUT_COMMAND = '.shipit'
   expect(await run()).toBe('safe-exit')
-  expect(infoMock).toHaveBeenCalledWith(
-    '⛔ no command detected in comment'
-  )
+  expect(infoMock).toHaveBeenCalledWith('⛔ no command detected in comment')
 })
 
 test('fails prechecks', async () => {

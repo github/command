@@ -141,7 +141,9 @@ export async function prechecks(
       `operation requested on a draft PR when draft PRs are not allowed`
     )
   } else if (isDraft && allowDraftPRs) {
-    core.info(`📓 operation requested on a ${COLORS.highlight}draft${COLORS.reset} pull request`)
+    core.info(
+      `📓 operation requested on a ${COLORS.highlight}draft${COLORS.reset} pull request`
+    )
   }
 
   // Grab the statusCheckRollup state from the GraphQL result
@@ -160,9 +162,7 @@ export async function prechecks(
       result.repository.pullRequest.commits.nodes[0].commit.checkSuites
         .totalCount === 0
     ) {
-      core.info(
-        '💡 no CI checks have been defined for this pull request'
-      )
+      core.info('💡 no CI checks have been defined for this pull request')
       commitStatus = null
 
       // If there are CI checked defined, we need to check for the 'state' of the latest commit
@@ -215,13 +215,13 @@ export async function prechecks(
 
     // CI checks have not been defined AND required reviewers have not been defined
   } else if (reviewDecision === null && commitStatus === null) {
-    message = '🎛️ CI checks have not been defined and required reviewers have not been defined'
+    message =
+      '🎛️ CI checks have not been defined and required reviewers have not been defined'
     core.info(message)
 
     // CI checks are passing and the reviewers is undefined
   } else if (reviewDecision === null && commitStatus === 'SUCCESS') {
-    message =
-      '✅ CI checks are passing and reviews are not defined'
+    message = '✅ CI checks are passing and reviews are not defined'
     core.info(message)
 
     // CI checks are passing and reviews are set to be bypassed
@@ -265,8 +265,7 @@ export async function prechecks(
 
     // If CI has not been defined but the PR has been approved
   } else if (commitStatus === null && reviewDecision === 'APPROVED') {
-    message =
-      '✅ CI checks have not been defined but the PR has been approved'
+    message = '✅ CI checks have not been defined but the PR has been approved'
     core.info(message)
 
     // If CI is pending and the PR has not been reviewed

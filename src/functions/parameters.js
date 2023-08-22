@@ -14,7 +14,9 @@ export async function parameters(body, param_separator = '|') {
   var paramsTrim = null
   if (params !== '') {
     paramsTrim = params.trim()
-    core.info(`🧮 detected parameters in command: ${COLORS.highlight}${paramsTrim}`)
+    core.info(
+      `🧮 detected parameters in command: ${COLORS.highlight}${paramsTrim}`
+    )
     core.setOutput('params', paramsTrim)
   } else {
     core.debug('no parameters detected in command')

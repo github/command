@@ -11,7 +11,9 @@ export async function triggerCheck(body, trigger) {
 
   // If the trigger is not activated, set the output to false and return with false
   if (!body.startsWith(trigger)) {
-    core.debug(`trigger ${COLORS.highlight}${trigger}${COLORS.reset} not found in the comment body`)
+    core.debug(
+      `trigger ${COLORS.highlight}${trigger}${COLORS.reset} not found in the comment body`
+    )
     return false
   }
 

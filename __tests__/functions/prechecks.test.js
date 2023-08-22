@@ -146,8 +146,7 @@ test('runs prechecks and finds that the IssueOps command is valid without define
       octokit
     )
   ).toStrictEqual({
-    message:
-      '✅ CI checks have not been defined but the PR has been approved',
+    message: '✅ CI checks have not been defined but the PR has been approved',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -257,8 +256,7 @@ test('runs prechecks and finds CI checks pass but reviews are not defined', asyn
       octokit
     )
   ).toStrictEqual({
-    message:
-      '✅ CI checks are passing and reviews are not defined',
+    message: '✅ CI checks are passing and reviews are not defined',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -637,7 +635,8 @@ test('runs prechecks and finds CI is passing but the PR is missing an approval',
       octokit
     )
   ).toStrictEqual({
-    message: '### ⚠️ Cannot proceed with operation\n\n> CI checks are passing but the PR has not been reviewed',
+    message:
+      '### ⚠️ Cannot proceed with operation\n\n> CI checks are passing but the PR has not been reviewed',
     status: false
   })
 })
@@ -919,8 +918,7 @@ test('runs prechecks and finds that no CI checks exist but reviews are defined',
       octokit
     )
   ).toStrictEqual({
-    message:
-      '✅ CI checks have not been defined but the PR has been approved',
+    message: '✅ CI checks have not been defined but the PR has been approved',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -1117,8 +1115,7 @@ test('runs prechecks and finds that skip_ci is set', async () => {
       octokit
     )
   ).toStrictEqual({
-    message:
-    `### ⚠️ Cannot proceed with operation\n\n> CI checks are not required for this operation but the PR has not been reviewed`,
+    message: `### ⚠️ Cannot proceed with operation\n\n> CI checks are not required for this operation but the PR has not been reviewed`,
     status: false
   })
 })
