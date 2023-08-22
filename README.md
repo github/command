@@ -60,3 +60,10 @@ For configuration details, see the [inputs](#inputs-) section below
 | `allowed_contexts` | `true` | `pull_request` | A comma separated list of comment contexts that are allowed to trigger this IssueOps command. Pull requests and issues are the only currently supported contexts. To allow IssueOps commands to be invoked from both PRs and issues, set this option to the following: `"pull_request,issue"`. By default, the only place this Action will allow IssueOps commands from is pull requests |
 | `permissions` | `true` | `"write,maintain,admin"` | The allowed GitHub permissions an actor can have to invoke IssueOps commands |
 | `allow_drafts` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on draft pull requests |
+| `allow_forks` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on forked pull requests |
+| `skip_ci` | `true` | `"false"` | Whether or not to require passing CI checks before this IssueOps command can be run |
+| `skip_reviews` | `true` | `"false"` | Whether or not to require reviews before this IssueOps command can be run |
+| `param_separator` | `true` | `"|"` | The separator to use for parsing parameters in comments in IssueOps commands. Parameters will are saved as outputs and can be used in subsequent steps. The default value for this input is the pipe character (`|`) |
+| `allowlist` | `false` | `"false"` | A comma separated list of GitHub usernames or teams that should be allowed to use the IssueOps commands configured in this Action. If unset, then all users meeting the "permissions" requirement will be able to run commands. Example: `"monalisa,octocat,my-org/my-team"` |
+| `allowlist_pat` | `false` | `"false"` | A GitHub personal access token with "read:org" scopes. This is only needed if you are using the "allowlist" option with a GitHub org team. For example: `"my-org/my-team"` |
+| `skip_completing` | `true` | `"false"` | If set to `"true"`, skip the process of completing the Action. This is useful if you want to customize the way this Action completes - For example, custom reactions, comments, etc |
