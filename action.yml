@@ -77,8 +77,6 @@ outputs:
     description: The issue number which this Action was triggered on
   initial_reaction_id:
     description: The reaction id for the initial reaction on the trigger comment
-  actor_handle:
-    description: The handle of the user who triggered the action
   fork:
     description: 'The string "true" if the pull request is a fork, otherwise "false"'
   fork_ref:
