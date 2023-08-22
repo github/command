@@ -2,7 +2,9 @@
 
 [![CodeQL](https://github.com/github/command/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/github/command/actions/workflows/codeql-analysis.yml) [![test](https://github.com/github/command/actions/workflows/test.yml/badge.svg)](https://github.com/github/command/actions/workflows/test.yml) [![package-check](https://github.com/github/command/actions/workflows/package-check.yml/badge.svg)](https://github.com/github/command/actions/workflows/package-check.yml) [![lint](https://github.com/github/command/actions/workflows/lint.yml/badge.svg)](https://github.com/github/command/actions/workflows/lint.yml) [![actions-config-validation](https://github.com/github/command/actions/workflows/actions-config-validation.yml/badge.svg)](https://github.com/github/command/actions/workflows/actions-config-validation.yml) [![coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
-IssueOps commands in GitHub Actions
+IssueOps commands in GitHub Actions!
+
+> _Like ChatOps but for GitHub Issues and Pull Requests_ 🤩
 
 ![ship-it](docs/assets/ship-it.jpg)
 
