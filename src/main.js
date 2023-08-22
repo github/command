@@ -9,6 +9,7 @@ import {parameters} from './functions/parameters'
 import {actionStatus} from './functions/action-status'
 import {prechecks} from './functions/prechecks'
 import {post} from './functions/post'
+import {COLORS} from './functions/colors'
 
 // :returns: 'success', 'failure', 'safe-exit' or raises an error
 export async function run() {
@@ -50,7 +51,7 @@ export async function run() {
       // if the comment does not contain the command, exit
       core.saveState('bypass', 'true')
       core.setOutput('triggered', 'false')
-      core.info('no command detected in comment - exiting')
+      core.info('⛔ no command detected in comment')
       return 'safe-exit'
     }
 
@@ -103,6 +104,7 @@ export async function run() {
     }
 
     core.setOutput('continue', 'true')
+    core.info(`🚀 ${COLORS.success}success!`)
     return 'success'
   } catch (error) {
     /* istanbul ignore next */

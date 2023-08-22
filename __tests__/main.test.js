@@ -135,7 +135,7 @@ test('fails due to no trigger being found', async () => {
   process.env.INPUT_COMMAND = '.shipit'
   expect(await run()).toBe('safe-exit')
   expect(infoMock).toHaveBeenCalledWith(
-    'no command detected in comment - exiting'
+    '⛔ no command detected in comment'
   )
 })
 
