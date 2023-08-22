@@ -15,13 +15,13 @@ export async function run() {
   try {
     // Get the inputs for the 'command' Action
     const command = core.getInput('command', {required: true})
-    const reaction = core.getInput('reaction')
     const token = core.getInput('github_token', {required: true})
+    const param_separator = core.getInput('param_separator')
+    const reaction = core.getInput('reaction')
     const allowForks = core.getBooleanInput('allow_forks')
     const skipCi = core.getBooleanInput('skip_ci')
     const allow_drafts = core.getBooleanInput('allow_drafts')
     const skipReviews = core.getBooleanInput('skip_reviews')
-    const param_separator = core.getInput('param_separator')
 
     // create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
