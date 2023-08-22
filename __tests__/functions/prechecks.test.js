@@ -1,10 +1,12 @@
 import {prechecks} from '../../src/functions/prechecks'
+import {COLORS} from '../../src/functions/colors'
 import * as isAllowed from '../../src/functions/allowlist'
 import * as validPermissions from '../../src/functions/valid-permissions'
 import * as core from '@actions/core'
 
 // Globals for testing
 const infoMock = jest.spyOn(core, 'info')
+const debugMock = jest.spyOn(core, 'debug')
 const defaultContextType = 'pull_request'
 
 var context
@@ -97,7 +99,7 @@ test('runs prechecks and finds that the IssueOps command is valid', async () => 
       octokit // octokit
     )
   ).toStrictEqual({
-    message: '✔️ PR is approved and all CI checks passed - OK',
+    message: '✅ PR is approved and all CI checks passed',
     ref: 'test-ref',
     status: true,
     sha: 'abc123'
@@ -117,7 +119,7 @@ test('runs prechecks and finds that the IssueOps command is valid and exits earl
       octokit // octokit
     )
   ).toStrictEqual({
-    message: '✔️ operation requested on an issue - OK',
+    message: `✅ operation requested on an ${COLORS.highlight}issue`,
     ref: null,
     status: true,
     sha: null
@@ -145,16 +147,19 @@ test('runs prechecks and finds that the IssueOps command is valid without define
     )
   ).toStrictEqual({
     message:
-      '✔️ CI checks have not been defined but the PR has been approved - OK',
+      '✅ CI checks have not been defined but the PR has been approved',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
-  expect(infoMock).toHaveBeenCalledWith(
-    "Could not retrieve PR commit status: TypeError: Cannot read properties of undefined (reading 'nodes') - Handled: OK"
+  expect(debugMock).toHaveBeenCalledWith(
+    "could not retrieve PR commit status: TypeError: Cannot read properties of undefined (reading 'nodes') - Handled: OK"
   )
-  expect(infoMock).toHaveBeenCalledWith(
-    'Skipping commit status check and proceeding...'
+  expect(debugMock).toHaveBeenCalledWith(
+    'this repo may not have any CI checks defined'
+  )
+  expect(debugMock).toHaveBeenCalledWith(
+    'skipping commit status check and proceeding...'
   )
 })
 
@@ -198,20 +203,23 @@ test('runs prechecks and finds that reviews and CI checks have not been defined'
     )
   ).toStrictEqual({
     message:
-      '⚠️ CI checks have not been defined and required reviewers have not been defined... proceeding - OK',
+      '🎛️ CI checks have not been defined and required reviewers have not been defined',
     status: true,
 
     ref: 'test-ref',
     sha: 'abc123'
   })
-  expect(infoMock).toHaveBeenCalledWith(
-    "Could not retrieve PR commit status: TypeError: Cannot read properties of undefined (reading 'nodes') - Handled: OK"
+  expect(debugMock).toHaveBeenCalledWith(
+    "could not retrieve PR commit status: TypeError: Cannot read properties of undefined (reading 'nodes') - Handled: OK"
+  )
+  expect(debugMock).toHaveBeenCalledWith(
+    'this repo may not have any CI checks defined'
+  )
+  expect(debugMock).toHaveBeenCalledWith(
+    'skipping commit status check and proceeding...'
   )
   expect(infoMock).toHaveBeenCalledWith(
-    'Skipping commit status check and proceeding...'
-  )
-  expect(infoMock).toHaveBeenCalledWith(
-    '⚠️ CI checks have not been defined and required reviewers have not been defined... proceeding - OK'
+    '🎛️ CI checks have not been defined and required reviewers have not been defined'
   )
 })
 
@@ -250,54 +258,14 @@ test('runs prechecks and finds CI checks pass but reviews are not defined', asyn
     )
   ).toStrictEqual({
     message:
-      '⚠️ CI checks have been defined but required reviewers have not been defined... proceeding - OK',
+      '✅ CI checks are passing and reviews are not defined',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
   })
   expect(infoMock).toHaveBeenLastCalledWith(
-    '⚠️ CI checks have been defined but required reviewers have not been defined... proceeding - OK'
+    '✅ CI checks are passing and reviews are not defined'
   )
-})
-
-test('runs prechecks and finds CI is passing and the PR has not been reviewed', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: 'REVIEW_REQUIRED',
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 1
-                },
-                statusCheckRollup: {
-                  state: 'SUCCESS'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
-
-  expect(
-    await prechecks(
-      '123',
-      true, // allow forks
-      false, // skip_ci
-      false, // skip_reviews
-      false, // allow_drafts
-      defaultContextType, // contextType
-      context,
-      octokit
-    )
-  ).toStrictEqual({
-    message: '⚠️ CI checks are passing but the PR has not been reviewed',
-    status: false
-  })
 })
 
 test('runs prechecks and finds that the IssueOps command is valid for a branch operation and is from a forked repository', async () => {
@@ -347,7 +315,7 @@ test('runs prechecks and finds that the IssueOps command is valid for a branch o
       octokit
     )
   ).toStrictEqual({
-    message: '✔️ PR is approved and all CI checks passed - OK',
+    message: '✅ PR is approved and all CI checks passed',
     status: true,
 
     ref: 'abcde12345',
@@ -669,7 +637,7 @@ test('runs prechecks and finds CI is passing but the PR is missing an approval',
       octokit
     )
   ).toStrictEqual({
-    message: '⚠️ CI checks are passing but the PR has not been reviewed',
+    message: '### ⚠️ Cannot proceed with operation\n\n> CI checks are passing but the PR has not been reviewed',
     status: false
   })
 })
@@ -789,7 +757,7 @@ test('runs prechecks and finds the skip_ci is set and reviews are not required',
     )
   ).toStrictEqual({
     message:
-      '⚠️ CI requirements have been disabled for this operation and required reviewers have not been defined... proceeding - OK',
+      '✅ CI requirements have been disabled for this operation and reviews are not required',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -900,7 +868,7 @@ test('runs prechecks and finds the PR is a DRAFT PR and drafts are allowed', asy
       octokit
     )
   ).toStrictEqual({
-    message: '✔️ PR is approved and all CI checks passed - OK',
+    message: '✅ PR is approved and all CI checks passed',
     ref: 'test-ref',
     status: true,
     sha: 'abc123'
@@ -917,49 +885,6 @@ test('runs prechecks and fails with a non 200 permissionRes.status', async () =>
     message: 'Permission check returns non-200 status: 500',
     status: false
   })
-})
-
-test('runs prechecks and finds that no CI checks exist and reviews are not defined', async () => {
-  octokit.graphql = jest.fn().mockReturnValue({
-    repository: {
-      pullRequest: {
-        reviewDecision: null,
-        commits: {
-          nodes: [
-            {
-              commit: {
-                checkSuites: {
-                  totalCount: 0
-                },
-                statusCheckRollup: null
-              }
-            }
-          ]
-        }
-      }
-    }
-  })
-  expect(
-    await prechecks(
-      '123',
-      true,
-      false,
-      false,
-      false,
-      defaultContextType, // contextType
-      context,
-      octokit
-    )
-  ).toStrictEqual({
-    message:
-      '⚠️ CI checks have not been defined and required reviewers have not been defined... proceeding - OK',
-    status: true,
-    ref: 'test-ref',
-    sha: 'abc123'
-  })
-  expect(infoMock).toHaveBeenLastCalledWith(
-    '⚠️ CI checks have not been defined and required reviewers have not been defined... proceeding - OK'
-  )
 })
 
 test('runs prechecks and finds that no CI checks exist but reviews are defined', async () => {
@@ -995,7 +920,7 @@ test('runs prechecks and finds that no CI checks exist but reviews are defined',
     )
   ).toStrictEqual({
     message:
-      '✔️ CI checks have not been defined but the PR has been approved - OK',
+      '✅ CI checks have not been defined but the PR has been approved',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -1036,7 +961,7 @@ test('runs prechecks and finds that skip_ci is set and the PR has been approved'
     )
   ).toStrictEqual({
     message:
-      '✔️ CI requirements have been disabled for this operation and the PR has been approved - OK',
+      '✅ CI requirements have been disabled for this operation and the PR has been approved',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -1100,14 +1025,14 @@ test('runs prechecks and finds that skip_ci is set and no reviews are defined', 
       octokit
     )
   ).toStrictEqual({
-    message: '✔️ CI and PR reviewers are not required for this operation - OK',
+    message: '✅ CI and PR reviewers are not required for this operation',
     ref: 'test-ref',
     status: true,
     sha: 'abc123'
   })
 
   expect(infoMock).toHaveBeenCalledWith(
-    '✔️ CI and PR reviewers are not required for this operation - OK'
+    '✅ CI and PR reviewers are not required for this operation'
   )
 })
 
@@ -1146,14 +1071,14 @@ test('runs prechecks and finds that skip_ci is set and skip_reviews is set', asy
       octokit
     )
   ).toStrictEqual({
-    message: '✔️ CI and PR reviewers are not required for this operation - OK',
+    message: '✅ CI and PR reviewers are not required for this operation',
     ref: 'test-ref',
     status: true,
     sha: 'abc123'
   })
 
   expect(infoMock).toHaveBeenCalledWith(
-    '✔️ CI and PR reviewers are not required for this operation - OK'
+    '✅ CI and PR reviewers are not required for this operation'
   )
 })
 
@@ -1193,7 +1118,7 @@ test('runs prechecks and finds that skip_ci is set', async () => {
     )
   ).toStrictEqual({
     message:
-      '⚠️ CI checks are not required for this operation but the PR has not been reviewed',
+    `### ⚠️ Cannot proceed with operation\n\n> CI checks are not required for this operation but the PR has not been reviewed`,
     status: false
   })
 })
@@ -1273,7 +1198,7 @@ test('runs prechecks and finds that the PR is NOT reviewed and CI checks have be
       octokit
     )
   ).toStrictEqual({
-    message: `✔️ CI and PR reviewers are not required for this operation - OK`,
+    message: `✅ CI and PR reviewers are not required for this operation`,
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -1315,7 +1240,7 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
       octokit // octokit instance
     )
   ).toStrictEqual({
-    message: '✔️ PR is approved and all CI checks passed - OK',
+    message: '✅ PR is approved and all CI checks passed',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
@@ -1358,7 +1283,7 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
     )
   ).toStrictEqual({
     message:
-      '✔️ CI checked passsed and required reviewers have been disabled for this operation - OK',
+      '✅ CI checks are passing and reviews have been disabled for this operation',
     status: true,
     ref: 'test-ref',
     sha: 'abc123'
