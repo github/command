@@ -13538,7 +13538,7 @@ async function run() {
     core.saveState('comment_id', github.context.payload.comment.id)
     core.setOutput('initial_reaction_id', reactRes.data.id)
     core.saveState('reaction_id', reactRes.data.id)
-    core.setOutput('actor_handle', github.context.payload.comment.user.login)
+    core.setOutput('actor', github.context.payload.comment.user.login)
 
     // check if any parameters were used in the command
     // note: this function does have a return, but we don't care about it...
