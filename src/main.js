@@ -9,19 +9,20 @@ import {parameters} from './functions/parameters'
 import {actionStatus} from './functions/action-status'
 import {prechecks} from './functions/prechecks'
 import {post} from './functions/post'
+import {COLORS} from './functions/colors'
 
 // :returns: 'success', 'failure', 'safe-exit' or raises an error
 export async function run() {
   try {
     // Get the inputs for the 'command' Action
     const command = core.getInput('command', {required: true})
-    const reaction = core.getInput('reaction')
     const token = core.getInput('github_token', {required: true})
+    const param_separator = core.getInput('param_separator')
+    const reaction = core.getInput('reaction')
     const allowForks = core.getBooleanInput('allow_forks')
     const skipCi = core.getBooleanInput('skip_ci')
     const allow_drafts = core.getBooleanInput('allow_drafts')
     const skipReviews = core.getBooleanInput('skip_reviews')
-    const param_separator = core.getInput('param_separator')
 
     // create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
@@ -50,7 +51,7 @@ export async function run() {
       // if the comment does not contain the command, exit
       core.saveState('bypass', 'true')
       core.setOutput('triggered', 'false')
-      core.info('no command detected in comment - exiting')
+      core.info('⛔ no command detected in comment')
       return 'safe-exit'
     }
 
@@ -63,7 +64,7 @@ export async function run() {
     core.saveState('comment_id', context.payload.comment.id)
     core.setOutput('initial_reaction_id', reactRes.data.id)
     core.saveState('reaction_id', reactRes.data.id)
-    core.setOutput('actor_handle', context.payload.comment.user.login)
+    core.setOutput('actor', context.payload.comment.user.login)
 
     // check if any parameters were used in the command
     // note: this function does have a return, but we don't care about it...
@@ -103,6 +104,7 @@ export async function run() {
     }
 
     core.setOutput('continue', 'true')
+    core.info(`🚀 ${COLORS.success}success!`)
     return 'success'
   } catch (error) {
     /* istanbul ignore next */

@@ -23,7 +23,7 @@ inputs:
   allowed_contexts:
     description: 'A comma separated list of comment contexts that are allowed to trigger this IssueOps command. Pull requests and issues are the only currently supported contexts'
     required: true
-    default: "pull_request,issue"
+    default: "pull_request"
   permissions:
     description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
     required: true
@@ -77,8 +77,6 @@ outputs:
     description: The issue number which this Action was triggered on
   initial_reaction_id:
     description: The reaction id for the initial reaction on the trigger comment
-  actor_handle:
-    description: The handle of the user who triggered the action
   fork:
     description: 'The string "true" if the pull request is a fork, otherwise "false"'
   fork_ref:

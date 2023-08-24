@@ -83,7 +83,7 @@ test('skips the process of completing the run', async () => {
     return skipped[name]
   })
   expect(await post()).toBeUndefined()
-  expect(infoMock).toHaveBeenCalledWith('skip_completing set, exiting')
+  expect(infoMock).toHaveBeenCalledWith('⏩ skip_completing set, exiting')
 })
 
 test('throws an error', async () => {

@@ -32,7 +32,7 @@ export async function post() {
 
     // if skip_completing is set, return
     if (skip_completing === 'true') {
-      core.info('skip_completing set, exiting')
+      core.info('⏩ skip_completing set, exiting')
       return
     }
 

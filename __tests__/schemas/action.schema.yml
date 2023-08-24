@@ -222,7 +222,3 @@ outputs:
     description:
       type: string
       required: true
-  actor_handle:
-    description:
-      type: string
-      required: true

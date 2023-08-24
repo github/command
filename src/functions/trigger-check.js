@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import {COLORS} from './colors'
 
 // A simple function that checks the body of the message against the trigger
 // :param body: The content body of the message being checked (String)
@@ -10,7 +11,9 @@ export async function triggerCheck(body, trigger) {
 
   // If the trigger is not activated, set the output to false and return with false
   if (!body.startsWith(trigger)) {
-    core.info(`Trigger "${trigger}" not found in the comment body`)
+    core.debug(
+      `trigger ${COLORS.highlight}${trigger}${COLORS.reset} not found in the comment body`
+    )
     return false
   }
 
