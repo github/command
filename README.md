@@ -279,7 +279,7 @@ This section will cover a few suggestions that will help you when using this Act
 
 ## Security 🔒
 
-TODO link out to the `security-` section on the `branch-deploy` Readme
+The security aspects of this Action have already been well documented in the `branch-deploy` repo. Please see the following [docs](https://github.com/github/branch-deploy/tree/ccff97cdddb9dc6f43748c6d17416ce66a4abff6#security-) to learn more.
 
 ---
 
