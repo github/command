@@ -1,4 +1,4 @@
-name: "command"
+name: "command-action"
 description: "IssueOps commands in GitHub Actions"
 author: "Grant Birkinbine"
 branding:
