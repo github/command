@@ -88,6 +88,6 @@ outputs:
   fork_full_name:
     description: 'The full name of the fork in "org/repo" format'
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"
   post: "dist/index.js"
