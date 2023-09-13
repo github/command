@@ -13610,7 +13610,10 @@ async function run() {
 if (core.getState('isPost') === 'true') {
   post()
 } else {
-  if (process.env.CI === 'true') {
+  if (
+    process.env.CI === 'true' &&
+    process.env.COMMAND_ACTION_JEST_TEST !== 'true'
+  ) {
     run()
   }
 }
