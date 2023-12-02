@@ -7575,10 +7575,10 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
-/***/ 8758:
+/***/ 8843:
 /***/ ((module) => {
 
-var module$1 = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
+var module$1 = /^(?:[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}|[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*(_[a-zA-Z0-9]+))$/i;
 
 module.exports = module$1;
 
@@ -32837,9 +32837,9 @@ async function validPermissions(octokit, context) {
   return true
 }
 
-// EXTERNAL MODULE: ./node_modules/github-username-regex/index.js
-var github_username_regex = __nccwpck_require__(8758);
-var github_username_regex_default = /*#__PURE__*/__nccwpck_require__.n(github_username_regex);
+// EXTERNAL MODULE: ./node_modules/github-username-regex-js/index.js
+var github_username_regex_js = __nccwpck_require__(8843);
+var github_username_regex_js_default = /*#__PURE__*/__nccwpck_require__.n(github_username_regex_js);
 ;// CONCATENATED MODULE: ./src/functions/allowlist.js
 
 
@@ -32942,7 +32942,7 @@ async function isAllowed(context) {
     // Otherwise, it is a github handle
     else {
       // Check if the github handle is valid
-      if (github_username_regex_default().test(operator)) {
+      if (github_username_regex_js_default().test(operator)) {
         // Add the handle to the list of handles and remove @ from the start of the handle
         handles.push(operator.replace('@', ''))
       } else {
