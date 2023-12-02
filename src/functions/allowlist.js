@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import githubUsernameRegex from 'github-username-regex'
+import githubUsernameRegex from 'github-username-regex-js'
 
 // Helper function to check if a user exists in an org team
 // :param actor: The user to check

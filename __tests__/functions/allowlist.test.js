@@ -61,6 +61,17 @@ test('runs isAllowed checks and finds a valid admin via handle reference', async
   )
 })
 
+test('runs isAllowed checks and finds a valid handle that is a GitHub EMU', async () => {
+  process.env.INPUT_ALLOWLIST = 'username_company'
+  const contextNoAdmin = {
+    actor: 'username_company'
+  }
+  expect(await isAllowed(contextNoAdmin)).toStrictEqual(true)
+  expect(debugMock).toHaveBeenCalledWith(
+    'username_company is an allowlisted operator via handle reference'
+  )
+})
+
 test('runs isAllowed checks and does not find a valid admin', async () => {
   process.env.INPUT_ALLOWLIST = 'monalisa'
   const contextNoAdmin = {
@@ -69,6 +80,17 @@ test('runs isAllowed checks and does not find a valid admin', async () => {
   expect(await isAllowed(contextNoAdmin)).toStrictEqual(false)
   expect(debugMock).toHaveBeenCalledWith(
     'eviluser is not an allowed operator for this command'
+  )
+})
+
+test('runs isAllowed checks and does not find a valid admin due to a bad GitHub handle', async () => {
+  process.env.INPUT_ALLOWLIST = 'mona%lisa-'
+  const contextNoAdmin = {
+    actor: 'mona%lisa-'
+  }
+  expect(await isAllowed(contextNoAdmin)).toStrictEqual(false)
+  expect(debugMock).toHaveBeenCalledWith(
+    'mona%lisa- is not a valid GitHub username... skipping allowlist check'
   )
 })
 
