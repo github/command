@@ -204,7 +204,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `continue` | ⭐ The string "true" if the workflow should continue, otherwise empty - Use this to conditionally control if your workflow should proceed or not. This is a step 2/2 check. This is the output you will want to use to determine if your IssueOps flow should _continue_ after this Action completes |
 | `comment_body` | The comment body |
 | `actor` | The GitHub handle of the actor that invoked the IssueOps command |
-| `params` | The raw parameters that were passed into the IssueOps command (see param_separator) - Further [documentation](docs/parameters.md) |
+| `params` | The raw parameters that were passed into the IssueOps command (see param_separator) - Further [documentation](docs/assets/parameters.md) |
 | `comment_id` | The comment id which triggered this action |
 | `issue_number` | The issue number of the pull request (or issue) that was commented on |
 | `initial_reaction_id` | The reaction id for the initial reaction on the trigger comment |
