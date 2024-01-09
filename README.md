@@ -191,7 +191,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `allow_forks` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on forked pull requests |
 | `skip_ci` | `true` | `"false"` | Whether or not to require passing CI checks before this IssueOps command can be run |
 | `skip_reviews` | `true` | `"false"` | Whether or not to require reviews before this IssueOps command can be run |
-| `param_separator` | `true` | `"|"` | The separator to use for parsing parameters in comments in IssueOps commands. Parameters will are saved as outputs and can be used in subsequent steps. The default value for this input is the pipe character (`|`) |
+| `param_separator` | `true` | `"\|"` | The separator to use for parsing parameters in comments in IssueOps commands. Parameters will are saved as outputs and can be used in subsequent steps. The default value for this input is the pipe character (`\|`) |
 | `allowlist` | `false` | `"false"` | A comma separated list of GitHub usernames or teams that should be allowed to use the IssueOps commands configured in this Action. If unset, then all users meeting the "permissions" requirement will be able to run commands. Example: `"monalisa,octocat,my-org/my-team"` |
 | `allowlist_pat` | `false` | `"false"` | A GitHub personal access token with "read:org" scopes. This is only needed if you are using the "allowlist" option with a GitHub org team. For example: `"my-org/my-team"` |
 | `skip_completing` | `true` | `"false"` | If set to `"true"`, skip the process of completing the Action. This is useful if you want to customize the way this Action completes - For example, custom reactions, comments, etc |
