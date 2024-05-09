@@ -33299,6 +33299,12 @@ async function prechecks(
     return {message: validPermissionsRes, status: false}
   }
 
+  // Get allowed operator data
+  if (!(await isAllowed(context))) {
+    message = `### ⚠️ Cannot proceed with operation\n\n> User ${context.actor} is not an allowed operator`
+    return {message: message, status: false}
+  }
+
   // if this is an issue comment, we can skip all the logic below here as it...
   // ... only applies to pull requests
   if (contextType === 'issue') {
@@ -33454,12 +33460,6 @@ async function prechecks(
         'Could not output raw graphql result for debugging - This is bad'
       )
     }
-  }
-
-  // Get allowed operator data
-  if (!(await isAllowed(context))) {
-    message = `### ⚠️ Cannot proceed with operation\n\n> User ${context.actor} is not an allowed operator`
-    return {message: message, status: false}
   }
 
   // log values for debugging
