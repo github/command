@@ -986,6 +986,22 @@ test('runs prechecks and finds that the user is not an allowed operator', async 
     message: `### ⚠️ Cannot proceed with operation\n\n> User monalisa is not an allowed operator`,
     status: false
   })
+
+  expect(
+    await prechecks(
+      '123',
+      true,
+      false, // skip_ci
+      true, // skip_reviews
+      false, // allow_drafts
+      'issue', // contextType
+      context,
+      octokit
+    )
+  ).toStrictEqual({
+    message: `### ⚠️ Cannot proceed with operation\n\n> User monalisa is not an allowed operator`,
+    status: false
+  })
 })
 
 test('runs prechecks and finds that skip_ci is set and no reviews are defined', async () => {
