@@ -49,12 +49,12 @@
     }
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.24.1",
-    "@babel/preset-env": "^7.24.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.24.6",
+    "@babel/preset-env": "^7.24.6",
     "@octokit/rest": "^20.1.1",
-    "@types/node": "^20.12.11",
+    "@types/node": "^20.13.0",
     "@vercel/ncc": "^0.38.1",
-    "@babel/core": "^7.24.5",
+    "@babel/core": "^7.24.6",
     "babel-jest": "^29.7.0",
     "eslint": "^8.57.0",
     "eslint-plugin-jest": "^28.5.0",
