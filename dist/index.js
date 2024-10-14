@@ -33644,7 +33644,7 @@ async function post() {
     }
 
     // if skip_completing is set, return
-    if (skip_completing === 'true') {
+    if (skip_completing) {
       core.info('⏩ skip_completing set, exiting')
       return
     }
