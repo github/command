@@ -31,7 +31,7 @@
     "@octokit/plugin-retry": "^6.0.1",
     "dedent-js": "^1.0.1",
     "github-username-regex-js": "^1.0.0",
-    "@octokit/rest": "^20.1.0"
+    "@octokit/rest": "^21.0.2"
   },
   "jest": {
     "coverageReporters": [
@@ -50,11 +50,11 @@
     }
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.25.7",
-    "@babel/preset-env": "^7.25.8",
-    "@types/node": "^22.7.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.25.9",
+    "@babel/preset-env": "^7.26.0",
+    "@types/node": "^22.8.6",
     "@vercel/ncc": "^0.38.2",
-    "@babel/core": "^7.25.8",
+    "@babel/core": "^7.26.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.57.0",
     "eslint-plugin-jest": "^28.8.3",
