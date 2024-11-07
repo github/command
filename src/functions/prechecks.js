@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as core from '@actions/core'
 import {validPermissions} from './valid-permissions'
 import {isAllowed} from './allowlist'
 import {COLORS} from './colors'
@@ -27,11 +28,24 @@ export async function prechecks(
   var message
 
   // Check if the user has valid permissions
+  core.debug('Checking user permissions...')
+  try {
   const validPermissionsRes = await validPermissions(octokit, context)
+  } catch (error) {
+    core.debug(`Error checking permissions: ${error.message}`)
+    if (error.message.includes('Resource not accessible by integration')) {
+      return {
+        message: 'Error: The GitHub token does not have the required permissions. Please ensure the workflow has the following permissions: pull-requests: write, issues: write, checks: read',
+        status: false
+      }
+    }
+    throw error
+  }
   if (validPermissionsRes !== true) {
     return {message: validPermissionsRes, status: false}
   }
 
+  core.debug('Checking if user is in allowlist...')
   // Get allowed operator data
   if (!(await isAllowed(context))) {
     message = `### ⚠️ Cannot proceed with operation\n\n> User ${context.actor} is not an allowed operator`
@@ -46,6 +60,7 @@ export async function prechecks(
     return {message: message, status: true, ref: null, sha: null}
   }
 
+  core.debug('Fetching PR data...')
   // Get the PR data
   const pr = await octokit.rest.pulls.get({
     ...context.repo,
@@ -126,7 +141,19 @@ export async function prechecks(
     }
   }
   // Make the GraphQL query
+  core.debug('Executing GraphQL query...')
+  try {
   const result = await octokit.graphql(query, variables)
+  } catch (error) {
+    core.debug(`GraphQL query error: ${error.message}`)
+    if (error.message.includes('Resource not accessible by integration')) {
+      return {
+        message: 'Error: The GitHub token does not have the required permissions to execute the GraphQL query. Please ensure the workflow has the following permissions: pull-requests: write, issues: write, checks: read',
+        status: false
+      }
+    }
+    throw error
+  }
 
   // Check the reviewDecision
   var reviewDecision
@@ -163,6 +190,7 @@ export async function prechecks(
       commitStatus = 'skip_ci'
     }
 
+    core.debug('Checking CI status...')
     // If there are no CI checks defined at all, we can set the commitStatus to null
     else if (
       result.repository.pullRequest.commits.nodes[0].commit.checkSuites
@@ -195,6 +223,7 @@ export async function prechecks(
     }
   }
 
+  core.debug('Precheck complete. Logging debug values...')
   // log values for debugging
   core.debug('precheck values for debugging:')
   core.debug(`reviewDecision: ${reviewDecision}`)
