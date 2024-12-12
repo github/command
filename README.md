@@ -216,6 +216,8 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `fork_label` | The API label field returned for the fork |
 | `fork_checkout` | The console command presented in the GitHub UI to checkout a given fork locally |
 | `fork_full_name` | The full name of the fork in "org/repo" format |
+| `sha` | The commit sha if being used in the context of a pull request |
+| `ref` | The ref if being used in the context of a pull request |
 
 ## Allowlist 👩‍🔬
 
