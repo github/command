@@ -79,6 +79,7 @@ jobs:
         id: command
         with:
           command: ".ping"
+          allowed_contexts: issue,pull_request # run on issues AND pull requests
 
       # run your custom logic for your project here - example seen below
 
@@ -139,7 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout your projects repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 ```
 
 Sets up your `demo` job, uses an ubuntu runner, and checks out your repo - Just some standard setup for a general Action. We also add an `if:` statement here to only run this workflow on pull request comments to make it a little more specific (if necessary)
@@ -185,6 +186,8 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `github_token` | `true` | `${{ github.token }}` | The GitHub token used to create an authenticated client - Provided for you by default! |
 | `status` | `true` | `${{ job.status }}` | The status of the GitHub Actions - For use in the post run workflow - Provided for you by default! |
 | `reaction` | `true` | `eyes` | If set, the specified emoji "reaction" is put on the comment to indicate that the trigger was detected. For example, "rocket" or "eyes" |
+| `success_reaction` | `true` | `+1` | The reaction to add to the comment that triggered the Action if its execution was successful |
+| `failure_reaction` | `true` | `-1` | The reaction to add to the comment that triggered the Action if its execution failed |
 | `allowed_contexts` | `true` | `pull_request` | A comma separated list of comment contexts that are allowed to trigger this IssueOps command. Pull requests and issues are the only currently supported contexts. To allow IssueOps commands to be invoked from both PRs and issues, set this option to the following: `"pull_request,issue"`. By default, the only place this Action will allow IssueOps commands from is pull requests |
 | `permissions` | `true` | `"write,maintain,admin"` | The allowed GitHub permissions an actor can have to invoke IssueOps commands |
 | `allow_drafts` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on draft pull requests |
@@ -213,6 +216,8 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `fork_label` | The API label field returned for the fork |
 | `fork_checkout` | The console command presented in the GitHub UI to checkout a given fork locally |
 | `fork_full_name` | The full name of the fork in "org/repo" format |
+| `sha` | The commit sha if being used in the context of a pull request |
+| `ref` | The ref if being used in the context of a pull request |
 
 ## Allowlist 👩‍🔬
 

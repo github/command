@@ -20,6 +20,14 @@ inputs:
     description: 'If set, the specified emoji "reaction" is put on the comment to indicate that the trigger was detected. For example, "rocket" or "eyes"'
     required: true
     default: "eyes"
+  success_reaction:
+    description: 'The reaction to add to the comment that triggered the Action if its execution was successful'
+    required: true
+    default: "+1"
+  failure_reaction:
+    description: 'The reaction to add to the comment that triggered the Action if its execution failed'
+    required: true
+    default: "-1"
   allowed_contexts:
     description: 'A comma separated list of comment contexts that are allowed to trigger this IssueOps command. Pull requests and issues are the only currently supported contexts'
     required: true
@@ -87,6 +95,10 @@ outputs:
     description: 'The console command presented in the GitHub UI to checkout a given fork locally'
   fork_full_name:
     description: 'The full name of the fork in "org/repo" format'
+  sha:
+    description: 'The commit sha if being used in the context of a pull request'
+  ref:
+    description: 'The ref if being used in the context of a pull request'
 runs:
   using: "node20"
   main: "dist/index.js"
