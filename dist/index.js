@@ -34398,9 +34398,11 @@ async function post() {
     }
 
     // Select the reaction to add to the issue_comment
+    // If it is a success, use the user defined reaction
+    // Otherwise, add a thumbs down reaction
     var reaction
     if (success) {
-      reaction = post_thumbsUp
+      reaction = core.getInput('reaction') || post_thumbsUp
     } else {
       reaction = post_thumbsDown
     }
