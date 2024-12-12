@@ -77,6 +77,26 @@ inputs:
     default:
       type: string
       required: true
+  success_reaction:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
+  failure_reaction:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
   allowed_contexts:
     description:
       type: string
