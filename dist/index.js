@@ -34248,7 +34248,8 @@ async function prechecks(
     // CI checks are set to be bypassed and the PR has not been reviewed
   } else if (
     commitStatus === 'skip_ci' &&
-    reviewDecision === 'REVIEW_REQUIRED'
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED')
   ) {
     message = `### ⚠️ Cannot proceed with operation\n\n> CI checks are not required for this operation but the PR has not been reviewed`
     return {message: message, status: false}
@@ -34260,7 +34261,8 @@ async function prechecks(
 
     // If CI is passing but the PR has not been reviewed
   } else if (
-    reviewDecision === 'REVIEW_REQUIRED' &&
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED') &&
     commitStatus === 'SUCCESS'
   ) {
     message = `### ⚠️ Cannot proceed with operation\n\n> CI checks are passing but the PR has not been reviewed`
@@ -34273,7 +34275,8 @@ async function prechecks(
 
     // If CI is pending and the PR has not been reviewed
   } else if (
-    reviewDecision === 'REVIEW_REQUIRED' &&
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED') &&
     commitStatus === 'PENDING'
   ) {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI is still in a pending state and reviews are also required for this operation`
@@ -34285,7 +34288,11 @@ async function prechecks(
     return {message: message, status: false}
 
     // If CI is undefined and the PR has not been reviewed
-  } else if (reviewDecision === 'REVIEW_REQUIRED' && commitStatus === null) {
+  } else if (
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED') &&
+    commitStatus === null
+  ) {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks have not been defined but reviews are required for this operation`
     return {message: message, status: false}
 
@@ -34329,19 +34336,19 @@ async function prechecks(
 // :param reaction: The reaction to add to the issue_comment
 // :param reaction_id: The reaction_id of the initial reaction on the issue_comment
 async function postReactions(octokit, context, reaction, reaction_id) {
+  // remove the initial reaction on the IssueOp comment that triggered this action
+  await octokit.rest.reactions.deleteForIssueComment({
+    ...context.repo,
+    comment_id: context.payload.comment.id,
+    reaction_id: parseInt(reaction_id)
+  })
+
   // Update the action status to indicate the result of the action as a reaction
   // add a reaction to the issue_comment to indicate success or failure
   await octokit.rest.reactions.createForIssueComment({
     ...context.repo,
     comment_id: context.payload.comment.id,
     content: reaction
-  })
-
-  // remove the initial reaction on the IssueOp comment that triggered this action
-  await octokit.rest.reactions.deleteForIssueComment({
-    ...context.repo,
-    comment_id: context.payload.comment.id,
-    reaction_id: parseInt(reaction_id)
   })
 }
 
@@ -34398,11 +34405,13 @@ async function post() {
     }
 
     // Select the reaction to add to the issue_comment
+    // If it is a success, use the user defined reaction
+    // Otherwise, add a thumbs down reaction
     var reaction
     if (success) {
-      reaction = post_thumbsUp
+      reaction = core.getInput('success_reaction') || post_thumbsUp
     } else {
-      reaction = post_thumbsDown
+      reaction = core.getInput('failed_reaction') || post_thumbsDown
     }
 
     // Update the reactions on the command comment
