@@ -34248,7 +34248,8 @@ async function prechecks(
     // CI checks are set to be bypassed and the PR has not been reviewed
   } else if (
     commitStatus === 'skip_ci' &&
-    reviewDecision === 'REVIEW_REQUIRED'
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED')
   ) {
     message = `### ⚠️ Cannot proceed with operation\n\n> CI checks are not required for this operation but the PR has not been reviewed`
     return {message: message, status: false}
@@ -34260,7 +34261,8 @@ async function prechecks(
 
     // If CI is passing but the PR has not been reviewed
   } else if (
-    reviewDecision === 'REVIEW_REQUIRED' &&
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED') &&
     commitStatus === 'SUCCESS'
   ) {
     message = `### ⚠️ Cannot proceed with operation\n\n> CI checks are passing but the PR has not been reviewed`
@@ -34273,7 +34275,8 @@ async function prechecks(
 
     // If CI is pending and the PR has not been reviewed
   } else if (
-    reviewDecision === 'REVIEW_REQUIRED' &&
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED') &&
     commitStatus === 'PENDING'
   ) {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI is still in a pending state and reviews are also required for this operation`
@@ -34285,7 +34288,11 @@ async function prechecks(
     return {message: message, status: false}
 
     // If CI is undefined and the PR has not been reviewed
-  } else if (reviewDecision === 'REVIEW_REQUIRED' && commitStatus === null) {
+  } else if (
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED') &&
+    commitStatus === null
+  ) {
     message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n- commitStatus: \`${commitStatus}\`\n\n> CI checks have not been defined but reviews are required for this operation`
     return {message: message, status: false}
 
