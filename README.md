@@ -79,6 +79,7 @@ jobs:
         id: command
         with:
           command: ".ping"
+          allowed_contexts: issue,pull_request # run on issues AND pull requests
 
       # run your custom logic for your project here - example seen below
 
@@ -139,7 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout your projects repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 ```
 
 Sets up your `demo` job, uses an ubuntu runner, and checks out your repo - Just some standard setup for a general Action. We also add an `if:` statement here to only run this workflow on pull request comments to make it a little more specific (if necessary)
