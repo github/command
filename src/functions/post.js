@@ -54,9 +54,9 @@ export async function post() {
     // Otherwise, add a thumbs down reaction
     var reaction
     if (success) {
-      reaction = core.getInput('reaction') || thumbsUp
+      reaction = core.getInput('success_reaction') || thumbsUp
     } else {
-      reaction = thumbsDown
+      reaction = core.getInput('failed_reaction') || thumbsDown
     }
 
     // Update the reactions on the command comment

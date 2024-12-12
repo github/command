@@ -34329,19 +34329,19 @@ async function prechecks(
 // :param reaction: The reaction to add to the issue_comment
 // :param reaction_id: The reaction_id of the initial reaction on the issue_comment
 async function postReactions(octokit, context, reaction, reaction_id) {
+  // remove the initial reaction on the IssueOp comment that triggered this action
+  await octokit.rest.reactions.deleteForIssueComment({
+    ...context.repo,
+    comment_id: context.payload.comment.id,
+    reaction_id: parseInt(reaction_id)
+  })
+
   // Update the action status to indicate the result of the action as a reaction
   // add a reaction to the issue_comment to indicate success or failure
   await octokit.rest.reactions.createForIssueComment({
     ...context.repo,
     comment_id: context.payload.comment.id,
     content: reaction
-  })
-
-  // remove the initial reaction on the IssueOp comment that triggered this action
-  await octokit.rest.reactions.deleteForIssueComment({
-    ...context.repo,
-    comment_id: context.payload.comment.id,
-    reaction_id: parseInt(reaction_id)
   })
 }
 
@@ -34402,9 +34402,9 @@ async function post() {
     // Otherwise, add a thumbs down reaction
     var reaction
     if (success) {
-      reaction = core.getInput('reaction') || post_thumbsUp
+      reaction = core.getInput('success_reaction') || post_thumbsUp
     } else {
-      reaction = post_thumbsDown
+      reaction = core.getInput('failed_reaction') || post_thumbsDown
     }
 
     // Update the reactions on the command comment
