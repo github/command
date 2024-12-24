@@ -67,6 +67,7 @@ on:
 permissions:
   pull-requests: write
   issues: write
+  contents: read
   checks: read
 
 jobs:
@@ -129,6 +130,7 @@ It is important to note that the workflow we want to run IssueOps on is `issue_c
 permissions:
   pull-requests: write # required for adding reactions to command comments on PRs
   issues: write # required for adding reactions to command comments on issues
+  contents: read # required for command to work
   checks: read # required for checking if the CI checks have passed on a pull request (if using this Action in the context of PR comments)
 ```
 
