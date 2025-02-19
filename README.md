@@ -68,6 +68,7 @@ permissions:
   pull-requests: write
   issues: write
   checks: read
+  contents: read # useful if your workflows call actions/checkout@vX.X.X
 
 jobs:
   demo:
