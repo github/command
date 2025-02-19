@@ -29,6 +29,7 @@
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
     "@octokit/plugin-retry": "^6.0.1",
+    "@octokit/request": "^9.2.1",
     "dedent-js": "^1.0.1",
     "github-username-regex-js": "^1.0.0",
     "@octokit/rest": "^21.1.0"
