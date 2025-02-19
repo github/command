@@ -10,10 +10,12 @@ import {actionStatus} from './functions/action-status'
 import {prechecks} from './functions/prechecks'
 import {post} from './functions/post'
 import {COLORS} from './functions/colors'
+import {VERSION} from './version'
 
 // :returns: 'success', 'failure', 'safe-exit' or raises an error
 export async function run() {
   try {
+    core.info(`🛸 github/command ${COLORS.info}${VERSION}${COLORS.reset}`)
     // Get the inputs for the 'command' Action
     const command = core.getInput('command', {required: true})
     const token = core.getInput('github_token', {required: true})
@@ -26,6 +28,7 @@ export async function run() {
 
     // create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
+      userAgent: `github/command@${VERSION}`,
       additionalPlugins: [octokitRetry]
     })
 
