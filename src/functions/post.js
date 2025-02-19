@@ -4,6 +4,7 @@ import * as github from '@actions/github'
 import {context} from '@actions/github'
 import {postReactions} from './post-reactions'
 import {octokitRetry} from '@octokit/plugin-retry'
+import {VERSION} from '../version'
 
 // Default failure reaction
 const thumbsDown = '-1'
@@ -38,6 +39,7 @@ export async function post() {
 
     // Create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
+      userAgent: `github/command@${VERSION}`,
       additionalPlugins: [octokitRetry]
     })
 

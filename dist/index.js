@@ -34982,7 +34982,19 @@ async function postReactions(octokit, context, reaction, reaction_id) {
   })
 }
 
+;// CONCATENATED MODULE: ./src/version.js
+// The version of the command Action
+// Acceptable version formats:
+// - v1.0.0
+// - v4.5.1
+// - v10.123.44
+// - v1.1.1-rc.1
+// - etc
+
+const VERSION = 'v1.4.0'
+
 ;// CONCATENATED MODULE: ./src/functions/post.js
+
 
 
 
@@ -35023,6 +35035,7 @@ async function post() {
 
     // Create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
+      userAgent: `github/command@${VERSION}`,
       additionalPlugins: [dist_node.octokitRetry]
     })
 
@@ -35068,9 +35081,11 @@ async function post() {
 
 
 
+
 // :returns: 'success', 'failure', 'safe-exit' or raises an error
 async function run() {
   try {
+    core.info(`🛸 github/command ${COLORS.info}${VERSION}${COLORS.reset}`)
     // Get the inputs for the 'command' Action
     const command = core.getInput('command', {required: true})
     const token = core.getInput('github_token', {required: true})
@@ -35083,6 +35098,7 @@ async function run() {
 
     // create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
+      userAgent: `github/command@${VERSION}`,
       additionalPlugins: [dist_node.octokitRetry]
     })
 
