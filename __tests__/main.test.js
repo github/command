@@ -30,6 +30,7 @@ beforeEach(() => {
   process.env.INPUT_SKIP_CI = 'false'
   process.env.INPUT_ALLOW_DRAFTS = 'false'
   process.env.INPUT_SKIP_REVIEWS = 'false'
+  process.env.INPUT_FORK_REVIEW_BYPASS = 'false'
   process.env.GITHUB_REPOSITORY = 'corp/test'
   github.context.payload = {
     issue: {

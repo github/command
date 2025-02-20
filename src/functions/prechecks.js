@@ -10,6 +10,7 @@ import {COLORS} from './colors'
 // :param skipReviews: Boolean which defines whether PR reviews should be skipped or not
 // :param allowDraftPRs: Boolean which defines whether draft PRs should be allowed or not
 // :param contextType: The type of context (issue or pull_request)
+// :param forkReviewBypass: Boolean which defines whether the Action should bypass the lack of reviews on a fork or not (dangerous)
 // :param context: The context of the event
 // :param octokit: The octokit client
 // :returns: An object that contains the results of the prechecks, message, ref, and status
@@ -19,6 +20,7 @@ export async function prechecks(
   skipCi,
   skipReviews,
   allowDraftPRs,
+  forkReviewBypass,
   contextType,
   context,
   octokit
@@ -65,11 +67,11 @@ export async function prechecks(
   core.setOutput('base_ref', baseRef)
   core.debug(`base_ref: ${baseRef}`)
 
-  var forkBypass = false
+  const isFork = pr?.data?.head?.repo?.fork == true
 
   // Determine whether to use the ref or sha depending on if the PR is from a fork or not
   // Note: We should not export fork values if the stable_branch is being used here
-  if (pr.data.head.repo?.fork === true && forkBypass === false) {
+  if (isFork === true) {
     core.info(`🍴 the pull request is a ${COLORS.highlight}fork`)
     core.setOutput('fork', 'true')
 
@@ -135,12 +137,27 @@ export async function prechecks(
 
   // Check the reviewDecision
   var reviewDecision
-  if (skipReviews) {
+  if (skipReviews && isFork === false) {
     // If skipReviews is true, we bypass the results the graphql
+    // This logic is not applied on forks as all PRs from forks must have the required reviews (if requested)
+    reviewDecision = 'skip_reviews'
+  } else if (skipReviews && isFork === true && forkReviewBypass === true) {
+    // If skipReviews is true, we bypass the results the graphql
+    // This logic is only applied on forks if forkReviewBypass is true
+    core.warning(
+      '🚨 bypassing required reviews on a fork - this is potentially dangerous if operating on a PR fork where code is being checked out - this is a good read about the risk https://github.com/github/branch-deploy/pull/331'
+    )
     reviewDecision = 'skip_reviews'
   } else {
     // Otherwise, grab the reviewDecision from the GraphQL result
     reviewDecision = result.repository.pullRequest.reviewDecision
+  }
+
+  // If pull request reviews are not required and the PR is from a fork we need to alert the user that this is potentially dangerous
+  if (reviewDecision === null && isFork === true) {
+    core.warning(
+      '🚨 pull request reviews are not enforced by this repository and this operation is being performed on a fork - this operation is dangerous! You should require reviews via branch protection settings (or rulesets) to ensure that the changes being operated on are the changes that you reviewed.'
+    )
   }
 
   // Grab the draft status
@@ -207,13 +224,24 @@ export async function prechecks(
   core.debug(`skipCi: ${skipCi}`)
   core.debug(`skipReviews: ${skipReviews}`)
   core.debug(`allowForks: ${allowForks}`)
-  core.debug(`forkBypass: ${forkBypass}`)
 
   if (isDraft && !allowDraftPRs) {
     message = `### ⚠️ Cannot proceed with operation\n\n> Your pull request is in a draft state`
     return {message: message, status: false}
 
-    // If everything is OK, print a nice message
+    // If the requested operation is taking place on a fork, the context is a PR, and the PR is not approved/reviewed -> do not allow bypassing the...
+    // lack of reviews. Enforce that ALL PRs originating from forks must have the required reviews.
+    // Operating on forks without reviews is a security risk and will not be allowed.
+    // This logic will even apply when the value of skip_reviews is set out of an abundance of caution.
+    // This logic will also apply even if the requested operator is an admin
+  } else if (
+    isFork === true &&
+    forkReviewBypass === false &&
+    (reviewDecision === 'REVIEW_REQUIRED' ||
+      reviewDecision === 'CHANGES_REQUESTED')
+  ) {
+    message = `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`${reviewDecision}\`\n\n> All operations from forks **must** have the required reviews before they can proceed. Please ensure this PR has been reviewed and approved before trying again.`
+    return {message: message, status: false}
   } else if (reviewDecision === 'APPROVED' && commitStatus === 'SUCCESS') {
     message = '✅ PR is approved and all CI checks passed'
     core.info(message)

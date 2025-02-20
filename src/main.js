@@ -25,6 +25,7 @@ export async function run() {
     const skipCi = core.getBooleanInput('skip_ci')
     const allow_drafts = core.getBooleanInput('allow_drafts')
     const skipReviews = core.getBooleanInput('skip_reviews')
+    const forkReviewBypass = core.getBooleanInput('fork_review_bypass')
 
     // create an octokit client with the retry plugin
     const octokit = github.getOctokit(token, {
@@ -84,6 +85,7 @@ export async function run() {
       skipCi,
       skipReviews,
       allow_drafts,
+      forkReviewBypass,
       contextCheckResults.context,
       context,
       octokit

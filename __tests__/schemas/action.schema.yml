@@ -187,6 +187,16 @@ inputs:
     default:
       type: string
       required: true
+  fork_review_bypass:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
 
 # outputs section
 outputs:
