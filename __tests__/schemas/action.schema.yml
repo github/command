@@ -250,3 +250,7 @@ outputs:
     description:
       type: string
       required: true
+  base_ref:
+    description:
+      type: string
+      required: true
