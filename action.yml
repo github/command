@@ -68,6 +68,10 @@ inputs:
     description: 'If set to "true", skip the process of completing the Action. This is useful if you want to customize the way this Action completes - For example, custom reactions, comments, etc'
     required: true
     default: "false"
+  fork_review_bypass:
+    description: 'If set to "true", allow forks to bypass the review requirement if the operation is being made on a pull request from a fork. This option is potentially dangerous if you are checking out code in your workflow as a result of invoking this Action. If the code you are checking out has not been reviewed, then you might open yourself up to a TOCTOU vulnerability. You should always ensure that the code you are checking out has been reviewed, and that you checkout an exact commit sha rather than a ref.'
+    required: true
+    default: "false"
 outputs:
   triggered:
     description: 'The string "true" if the trigger was found, otherwise the string "false" - Just because the workflow was triggered does not mean it should continue. This is a step 1/2 check'

@@ -7,6 +7,7 @@ import * as core from '@actions/core'
 // Globals for testing
 const infoMock = jest.spyOn(core, 'info')
 const debugMock = jest.spyOn(core, 'debug')
+const warningMock = jest.spyOn(core, 'warning')
 const defaultContextType = 'pull_request'
 
 var context
@@ -94,6 +95,7 @@ test('runs prechecks and finds that the IssueOps command is valid', async () => 
       false, // skipCi
       false, // skipReviews
       false, // allowDraftPRs
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context, // context
       octokit // octokit
@@ -114,6 +116,7 @@ test('runs prechecks and finds that the IssueOps command is valid and exits earl
       false, // skipCi
       false, // skipReviews
       false, // allowDraftPRs
+      false, // forkReviewBypass
       'issue', // contextType
       context, // context
       octokit // octokit
@@ -141,6 +144,7 @@ test('runs prechecks and finds that the IssueOps command is valid without define
       false, // skip_ci
       false, // skipReviews
       false, // allowDraftPRs
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -171,6 +175,7 @@ test('runs prechecks and fails due to a bad pull request', async () => {
       false,
       false,
       false,
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -196,6 +201,7 @@ test('runs prechecks and finds that reviews and CI checks have not been defined'
       false, // skip_ci
       false, // skipReviews
       false, // allowDraftPRs
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -251,6 +257,7 @@ test('runs prechecks and finds CI checks pass but reviews are not defined', asyn
       false, // skip_ci
       false, // skipReviews
       false, // allowDraftPRs
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -308,6 +315,7 @@ test('runs prechecks and finds that the IssueOps command is valid for a branch o
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -316,6 +324,115 @@ test('runs prechecks and finds that the IssueOps command is valid for a branch o
     message: '✅ PR is approved and all CI checks passed',
     status: true,
 
+    ref: 'abcde12345',
+    sha: 'abcde12345'
+  })
+})
+
+test('runs prechecks and finds that the IssueOps command is not valid for a operation and is from a forked repository since forkReviewBypass is disabled by default', async () => {
+  octokit.graphql = jest.fn().mockReturnValue({
+    repository: {
+      pullRequest: {
+        reviewDecision: 'CHANGES_REQUESTED',
+        commits: {
+          nodes: [
+            {
+              commit: {
+                checkSuites: {
+                  totalCount: 8
+                },
+                statusCheckRollup: {
+                  state: 'SUCCESS'
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+  octokit.rest.pulls.get = jest.fn().mockReturnValue({
+    data: {
+      head: {
+        sha: 'abcde12345',
+        ref: 'test-ref',
+        label: 'test-repo:test-ref',
+        repo: {
+          fork: true
+        }
+      }
+    },
+    status: 200
+  })
+  expect(
+    await prechecks(
+      '123',
+      true, // allow forks
+      false, // skip_ci
+      false, // skip_reviews
+      false, // allow_drafts
+      false, // forkReviewBypass
+      defaultContextType, // contextType
+      context,
+      octokit
+    )
+  ).toStrictEqual({
+    message: `### ⚠️ Cannot proceed with operation\n\n- reviewDecision: \`CHANGES_REQUESTED\`\n\n> All operations from forks **must** have the required reviews before they can proceed. Please ensure this PR has been reviewed and approved before trying again.`,
+    status: false
+  })
+})
+
+test('runs prechecks and finds that the IssueOps command is valid for a operation and is from a forked repository since forkReviewBypass enabled (dangerous)', async () => {
+  octokit.graphql = jest.fn().mockReturnValue({
+    repository: {
+      pullRequest: {
+        reviewDecision: 'REVIEW_REQUIRED',
+        commits: {
+          nodes: [
+            {
+              commit: {
+                checkSuites: {
+                  totalCount: 8
+                },
+                statusCheckRollup: {
+                  state: 'SUCCESS'
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+  octokit.rest.pulls.get = jest.fn().mockReturnValue({
+    data: {
+      head: {
+        sha: 'abcde12345',
+        ref: 'test-ref',
+        label: 'test-repo:test-ref',
+        repo: {
+          fork: true
+        }
+      }
+    },
+    status: 200
+  })
+  expect(
+    await prechecks(
+      '123',
+      true, // allow forks
+      false, // skip_ci
+      true, // skip_reviews
+      false, // allow_drafts
+      true, // forkReviewBypass
+      defaultContextType, // contextType
+      context,
+      octokit
+    )
+  ).toStrictEqual({
+    message:
+      '✅ CI checks are passing and reviews have been disabled for this operation',
+    status: true,
     ref: 'abcde12345',
     sha: 'abcde12345'
   })
@@ -362,6 +479,7 @@ test('runs prechecks and finds that the IssueOps command is on a PR from a forke
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -402,6 +520,7 @@ test('runs prechecks and finds CI is pending and the PR has not been reviewed', 
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -443,6 +562,7 @@ test('runs prechecks and finds CI is pending and the PR has not been reviewed bu
       false, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -484,6 +604,7 @@ test('runs prechecks and finds CI is failing and the PR has not been reviewed bu
       false, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -524,6 +645,7 @@ test('runs prechecks and finds CI is pending and reviewers have not been defined
       false,
       false,
       false,
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -551,6 +673,7 @@ test('runs prechecks and finds CI checked have not been defined and the PR has n
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -590,6 +713,7 @@ test('runs prechecks and finds the PR has been approved but CI checks are pendin
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -599,6 +723,73 @@ test('runs prechecks and finds the PR has been approved but CI checks are pendin
       '### ⚠️ Cannot proceed with operation\n\n- reviewDecision: `APPROVED`\n- commitStatus: `PENDING`\n\n> Reviews are not required for this operation but CI checks must be passing in order to continue',
     status: false
   })
+})
+
+test('runs prechecks and finds that the IssueOps command is a fork and does not require reviews so it proceeds but with a warning', async () => {
+  octokit.graphql = jest.fn().mockReturnValue({
+    repository: {
+      pullRequest: {
+        reviewDecision: null,
+        reviews: {
+          totalCount: 0
+        },
+        commits: {
+          nodes: [
+            {
+              commit: {
+                oid: 'abcde12345',
+                checkSuites: {
+                  totalCount: 8
+                },
+                statusCheckRollup: {
+                  state: 'SUCCESS'
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  })
+  octokit.rest.pulls.get = jest.fn().mockReturnValue({
+    data: {
+      head: {
+        sha: 'abcde12345',
+        ref: 'test-ref',
+        label: 'test-repo:test-ref',
+        repo: {
+          fork: true
+        }
+      },
+      base: {
+        ref: 'base-ref'
+      }
+    },
+    status: 200
+  })
+
+  expect(
+    await prechecks(
+      '123',
+      true, // allow forks
+      false, // skip_ci
+      false, // skip_reviews
+      false, // allow_drafts
+      false, // forkReviewBypass
+      defaultContextType, // contextType
+      context,
+      octokit
+    )
+  ).toStrictEqual({
+    message: '✅ CI checks are passing and reviews are not defined',
+    status: true,
+    ref: 'abcde12345',
+    sha: 'abcde12345'
+  })
+
+  expect(warningMock).toHaveBeenCalledWith(
+    '🚨 pull request reviews are not enforced by this repository and this operation is being performed on a fork - this operation is dangerous! You should require reviews via branch protection settings (or rulesets) to ensure that the changes being operated on are the changes that you reviewed.'
+  )
 })
 
 test('runs prechecks and finds CI is passing but the PR is missing an approval', async () => {
@@ -630,6 +821,7 @@ test('runs prechecks and finds CI is passing but the PR is missing an approval',
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -670,6 +862,7 @@ test('runs prechecks and finds the PR is approved but CI is failing', async () =
       false,
       false,
       false,
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -710,6 +903,7 @@ test('runs prechecks and finds the PR does not require approval but CI is failin
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -750,6 +944,7 @@ test('runs prechecks and finds the skip_ci is set and reviews are not required',
       true, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -806,7 +1001,8 @@ test('runs prechecks and finds the PR is a DRAFT PR', async () => {
       true, // allow forks
       false, // skip_ci
       false, // skip_reviews
-      false, // allow_drafts input option
+      false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -861,7 +1057,8 @@ test('runs prechecks and finds the PR is a DRAFT PR and drafts are allowed', asy
       true,
       false,
       false,
-      true, // allow_drafts input option
+      true, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -913,6 +1110,7 @@ test('runs prechecks and finds that no CI checks exist but reviews are defined',
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -953,6 +1151,7 @@ test('runs prechecks and finds that skip_ci is set and the PR has been approved'
       true, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -978,6 +1177,7 @@ test('runs prechecks and finds that the user is not an allowed operator', async 
       false, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -994,6 +1194,7 @@ test('runs prechecks and finds that the user is not an allowed operator', async 
       false, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       'issue', // contextType
       context,
       octokit
@@ -1034,6 +1235,7 @@ test('runs prechecks and finds that skip_ci is set and no reviews are defined', 
       true, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -1080,6 +1282,7 @@ test('runs prechecks and finds that skip_ci is set and skip_reviews is set', asy
       true, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -1126,6 +1329,7 @@ test('runs prechecks and finds that skip_ci is set', async () => {
       true, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -1166,6 +1370,7 @@ test('runs prechecks and finds that CI is pending and reviewers have not been de
       false, // skip_ci
       false, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -1206,6 +1411,7 @@ test('runs prechecks and finds that the PR is NOT reviewed and CI checks have be
       true, // skip_ci
       true, // skip_reviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context,
       octokit
@@ -1248,6 +1454,7 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
       false, // skipCi
       false, // skipReviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context, // event context
       octokit // octokit instance
@@ -1290,6 +1497,7 @@ test('runs prechecks and finds the PR is approved and ci is passing', async () =
       false, // skipCi
       true, // skipReviews
       false, // allow_drafts
+      false, // forkReviewBypass
       defaultContextType, // contextType
       context, // event context
       octokit // octokit instance
