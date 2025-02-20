@@ -18,7 +18,7 @@ beforeEach(() => {
   jest.spyOn(core, 'debug').mockImplementation(() => {})
   jest.spyOn(core, 'warning').mockImplementation(() => {})
   jest.spyOn(core, 'setOutput').mockImplementation(() => {})
-  process.env.INPUT_PERMISSIONS = 'admin,write,maintain'
+  process.env.INPUT_PERMISSIONS = 'admin,write'
 
   jest.spyOn(validPermissions, 'validPermissions').mockImplementation(() => {
     return true
