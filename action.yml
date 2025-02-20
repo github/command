@@ -33,9 +33,9 @@ inputs:
     required: true
     default: "pull_request"
   permissions:
-    description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,maintain,admin"'
+    description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,admin"'
     required: true
-    default: "write,maintain,admin"
+    default: "write,admin"
   allow_drafts:
     description: 'Whether or not to allow this IssueOps command to be run on draft pull requests'
     required: true
