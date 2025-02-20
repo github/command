@@ -34996,7 +34996,7 @@ async function postReactions(octokit, context, reaction, reaction_id) {
 // - v1.1.1-rc.1
 // - etc
 
-const VERSION = 'v1.4.0'
+const VERSION = 'v1.5.0'
 
 ;// CONCATENATED MODULE: ./src/functions/post.js
 
