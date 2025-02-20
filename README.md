@@ -219,6 +219,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `fork_full_name` | The full name of the fork in "org/repo" format |
 | `sha` | The commit sha if being used in the context of a pull request |
 | `ref` | The ref if being used in the context of a pull request |
+| `base_ref` | The base ref that the pull request is merging into (if available and run in the context of a pull request) |
 
 ## Allowlist 👩‍🔬
 

@@ -60,6 +60,11 @@ export async function prechecks(
   var sha = pr.data.head.sha
   var ref = pr.data.head.ref
 
+  // set an output which is the branch name this PR is targeting to merge into
+  const baseRef = pr?.data?.base?.ref
+  core.setOutput('base_ref', baseRef)
+  core.debug(`base_ref: ${baseRef}`)
+
   var forkBypass = false
 
   // Determine whether to use the ref or sha depending on if the PR is from a fork or not
