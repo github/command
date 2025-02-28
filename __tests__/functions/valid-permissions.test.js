@@ -16,6 +16,14 @@ beforeEach(() => {
 
   octokit = {
     rest: {
+      users: {
+        getByUsername: jest.fn().mockReturnValueOnce({
+          status: 200,
+          data: {
+            type: 'User'
+          }
+        })
+      },
       repos: {
         getCollaboratorPermissionLevel: jest.fn().mockReturnValueOnce({
           status: 200,
@@ -23,6 +31,9 @@ beforeEach(() => {
             permission: 'write'
           }
         })
+      },
+      apps: {
+        getRepoInstallation: jest.fn()
       }
     }
   }
@@ -60,4 +71,72 @@ test('fails to get actor permissions due to a bad status code', async () => {
     'Permission check returns non-200 status: 500'
   )
   expect(setOutputMock).toHaveBeenCalledWith('actor', 'monalisa')
+})
+
+test('determines that a GitHub App has valid permissions', async () => {
+  context.actor = 'github-actions[bot]'
+
+  octokit.rest.users.getByUsername.mockReturnValueOnce({
+    status: 200,
+    data: {
+      type: 'Bot'
+    }
+  })
+
+  octokit.rest.apps.getRepoInstallation.mockReturnValueOnce({
+    status: 200,
+    data: {
+      permissions: {
+        issues: 'write'
+      }
+    }
+  })
+
+  expect(await validPermissions(octokit, context)).toEqual(true)
+  expect(setOutputMock).toHaveBeenCalledWith('actor', 'github-actions[bot]')
+})
+
+test('determines that a GitHub App does not have valid permissions', async () => {
+  context.actor = 'monalisa[bot]'
+
+  octokit.rest.users.getByUsername.mockReturnValueOnce({
+    status: 200,
+    data: {
+      type: 'Bot'
+    }
+  })
+
+  octokit.rest.apps.getRepoInstallation.mockReturnValueOnce({
+    status: 200,
+    data: {
+      permissions: {
+        issues: 'read'
+      }
+    }
+  })
+
+  expect(await validPermissions(octokit, context)).toEqual(
+    '👋 __monalisa[bot]__ does not have "issues" permission set to "write". Current permissions: {"issues":"read"}'
+  )
+  expect(setOutputMock).toHaveBeenCalledWith('actor', 'monalisa[bot]')
+})
+
+test('fails to fetch installation details for GitHub App', async () => {
+  context.actor = 'monalisa[bot]'
+
+  octokit.rest.users.getByUsername.mockReturnValueOnce({
+    status: 200,
+    data: {
+      type: 'Bot'
+    }
+  })
+
+  octokit.rest.apps.getRepoInstallation.mockReturnValueOnce({
+    status: 500
+  })
+
+  expect(await validPermissions(octokit, context)).toEqual(
+    'Failed to fetch GitHub App installation details: Status 500'
+  )
+  expect(setOutputMock).toHaveBeenCalledWith('actor', 'monalisa[bot]')
 })

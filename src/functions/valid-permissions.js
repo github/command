@@ -13,6 +13,44 @@ export async function validPermissions(octokit, context) {
 
   core.setOutput('actor', context.actor)
 
+  // Get Actor Type from GitHub API
+  const userRes = await octokit.rest.users.getByUsername(
+    {
+    username: context.actor
+    }
+  )
+
+  if (userRes.status !== 200) {
+    return `Fetch user details returns non-200 status: ${userRes.status}`
+  }
+
+  const actorType = userRes.data.type; // "User" or "Bot"
+  core.info(`🔍 Detected actor type: ${actorType} (${context.actor})`);
+
+  // Handle GitHub Apps (Bots)
+  if (actorType === 'Bot') {
+    // Fetch installation details for the GitHub App
+    const installationRes = await octokit.rest.apps.getRepoInstallation(
+      {
+        owner: context.repo.owner,
+        repo: context.repo.repo
+      }
+    )
+
+    if (installationRes.status !== 200) {
+      return `Failed to fetch GitHub App installation details: Status ${installationRes.status}`
+    }
+
+    const appPermissions = installationRes.data.permissions || {};
+
+    // Ensure the bot has "issues" permission set to "write"
+    if (appPermissions.issues !== 'write') {
+      return `👋 __${context.actor}__ does not have "issues" permission set to "write". Current permissions: ${JSON.stringify(appPermissions)}`;
+    }
+
+    return true
+  }
+
   // Get the permissions of the user who made the comment
   const permissionRes = await octokit.rest.repos.getCollaboratorPermissionLevel(
     {

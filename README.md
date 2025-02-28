@@ -190,7 +190,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `success_reaction` | `true` | `+1` | The reaction to add to the comment that triggered the Action if its execution was successful |
 | `failure_reaction` | `true` | `-1` | The reaction to add to the comment that triggered the Action if its execution failed |
 | `allowed_contexts` | `true` | `pull_request` | A comma separated list of comment contexts that are allowed to trigger this IssueOps command. Pull requests and issues are the only currently supported contexts. To allow IssueOps commands to be invoked from both PRs and issues, set this option to the following: `"pull_request,issue"`. By default, the only place this Action will allow IssueOps commands from is pull requests |
-| `permissions` | `true` | `"write,admin"` | The allowed GitHub permissions an actor can have to invoke IssueOps commands |
+| `permissions` | `true` | `"write,admin"` | The allowed GitHub permissions an actor can have to invoke IssueOps commands. Note that permission check for GitHub App ignores this and instead expects "issues" permission set to "write". |
 | `allow_drafts` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on draft pull requests |
 | `allow_forks` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on forked pull requests |
 | `skip_ci` | `true` | `"false"` | Whether or not to require passing CI checks before this IssueOps command can be run |

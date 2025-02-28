@@ -33,7 +33,7 @@ inputs:
     required: true
     default: "pull_request"
   permissions:
-    description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,admin"'
+    description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,admin". Permission check for GitHub App ignores this and instead expects "issues" permission set to "write".'
     required: true
     default: "write,admin"
   allow_drafts:
@@ -57,7 +57,7 @@ inputs:
     required: true
     default: "|"
   allowlist:
-    description: 'A comma separated list of GitHub usernames or teams that should be allowed to use the IssueOps commands configured in this Action. If unset, then all users meeting the "permissions" requirement will be able to run commands. Example: "monalisa,octocat,my-org/my-team"'
+    description: 'A comma separated list of GitHub usernames or teams that should be allowed to use the IssueOps commands configured in this Action. If unset, then all users meeting the "permissions" requirement will be able to run commands. Example: "monalisa,monalisa[bot],octocat,my-org/my-team"'
     required: false
     default: "false"
   allowlist_pat:
