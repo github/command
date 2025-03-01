@@ -34461,6 +34461,10 @@ async function validPermissions(octokit, context) {
     core.getInput('permissions', {required: true})
   )
 
+  const allowGitHubApps = core.getBooleanInput('allow_github_apps', {
+    required: true
+  })
+
   core.setOutput('actor', context.actor)
 
   // Get Actor Type from GitHub API
@@ -34474,9 +34478,14 @@ async function validPermissions(octokit, context) {
 
   const actorType = userRes.data.type // "User" or "Bot"
   core.info(`🔍 Detected actor type: ${actorType} (${context.actor})`)
+  core.setOutput('actor_type', actorType)
 
   // Handle GitHub Apps (Bots)
   if (actorType === 'Bot') {
+    if (!allowGitHubApps) {
+      return `GitHub Apps are not allowed to use this Action based on the "allow_github_apps" input.`
+    }
+
     // Fetch installation details for the GitHub App
     const installationRes = await octokit.rest.apps.getRepoInstallation({
       ...context.repo

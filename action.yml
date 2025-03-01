@@ -72,6 +72,10 @@ inputs:
     description: 'If set to "true", allow forks to bypass the review requirement if the operation is being made on a pull request from a fork. This option is potentially dangerous if you are checking out code in your workflow as a result of invoking this Action. If the code you are checking out has not been reviewed, then you might open yourself up to a TOCTOU vulnerability. You should always ensure that the code you are checking out has been reviewed, and that you checkout an exact commit sha rather than a ref.'
     required: true
     default: "false"
+  allow_github_apps:
+    description: 'If set to "true", allow GitHub Apps to interact with or trigger this Action view issue/pull_request comments. If you want to explicitly prevent GitHub Apps from invoking this Action, then set this to "false".'
+    required: true
+    default: "true"
 outputs:
   triggered:
     description: 'The string "true" if the trigger was found, otherwise the string "false" - Just because the workflow was triggered does not mean it should continue. This is a step 1/2 check'
@@ -105,6 +109,8 @@ outputs:
     description: 'The ref if being used in the context of a pull request'
   base_ref:
     description: The base ref that the pull request is merging into (if available and run in the context of a pull request)
+  actor_type:
+    description: 'The type of user/actor that triggered the IssueOps command. Values can be "User" or "Bot"'
 runs:
   using: "node20"
   main: "dist/index.js"
