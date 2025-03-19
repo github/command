@@ -197,6 +197,16 @@ inputs:
     default:
       type: string
       required: true
+  allow_github_apps:
+    description:
+      type: string
+      required: true
+    required:
+      type: boolean
+      required: true
+    default:
+      type: string
+      required: true
 
 # outputs section
 outputs:
@@ -261,6 +271,10 @@ outputs:
       type: string
       required: true
   base_ref:
+    description:
+      type: string
+      required: true
+  actor_type:
     description:
       type: string
       required: true

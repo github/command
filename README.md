@@ -190,7 +190,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `success_reaction` | `true` | `+1` | The reaction to add to the comment that triggered the Action if its execution was successful |
 | `failure_reaction` | `true` | `-1` | The reaction to add to the comment that triggered the Action if its execution failed |
 | `allowed_contexts` | `true` | `pull_request` | A comma separated list of comment contexts that are allowed to trigger this IssueOps command. Pull requests and issues are the only currently supported contexts. To allow IssueOps commands to be invoked from both PRs and issues, set this option to the following: `"pull_request,issue"`. By default, the only place this Action will allow IssueOps commands from is pull requests |
-| `permissions` | `true` | `"write,admin"` | The allowed GitHub permissions an actor can have to invoke IssueOps commands |
+| `permissions` | `true` | `"write,admin"` | The allowed GitHub permissions an actor can have to invoke IssueOps commands. Note that permission check for GitHub App ignores this and instead expects "issues" permission set to "write". |
 | `allow_drafts` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on draft pull requests |
 | `allow_forks` | `true` | `"false"` | Whether or not to allow this IssueOps command to be run on forked pull requests |
 | `skip_ci` | `true` | `"false"` | Whether or not to require passing CI checks before this IssueOps command can be run |
@@ -200,6 +200,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `allowlist_pat` | `false` | `"false"` | A GitHub personal access token with "read:org" scopes. This is only needed if you are using the "allowlist" option with a GitHub org team. For example: `"my-org/my-team"` |
 | `skip_completing` | `true` | `"false"` | If set to `"true"`, skip the process of completing the Action. This is useful if you want to customize the way this Action completes - For example, custom reactions, comments, etc |
 | `fork_review_bypass` | `true` | `"false"` | If set to "true", allow forks to bypass the review requirement if the operation is being made on a pull request from a fork. This option is potentially dangerous if you are checking out code in your workflow as a result of invoking this Action. If the code you are checking out has not been reviewed, then you might open yourself up to a TOCTOU vulnerability. You should always ensure that the code you are checking out has been reviewed, and that you checkout an exact commit sha rather than a ref. |
+| `allow_github_apps` | `true` | `"true"` | If set to `true`, allow GitHub Apps to interact with or trigger this Action view issue/pull_request comments. If you want to explicitly prevent GitHub Apps from invoking this Action, then set this to `false`. For more information, see the [GitHub App docs for this Action](./docs/using_github_apps.md). |
 
 ## Outputs 📤
 
@@ -209,7 +210,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `continue` | ⭐ The string "true" if the workflow should continue, otherwise empty - Use this to conditionally control if your workflow should proceed or not. This is a step 2/2 check. This is the output you will want to use to determine if your IssueOps flow should _continue_ after this Action completes |
 | `comment_body` | The comment body |
 | `actor` | The GitHub handle of the actor that invoked the IssueOps command |
-| `params` | The raw parameters that were passed into the IssueOps command (see param_separator) - Further [documentation](docs/assets/parameters.md) |
+| `params` | The raw parameters that were passed into the IssueOps command (see param_separator) - Further [documentation](docs/parameters.md) |
 | `comment_id` | The comment id which triggered this action |
 | `issue_number` | The issue number of the pull request (or issue) that was commented on |
 | `initial_reaction_id` | The reaction id for the initial reaction on the trigger comment |
@@ -221,6 +222,7 @@ As seen above, we have a single example step. Perhaps you would actually use a r
 | `sha` | The commit sha if being used in the context of a pull request |
 | `ref` | The ref if being used in the context of a pull request |
 | `base_ref` | The base ref that the pull request is merging into (if available and run in the context of a pull request) |
+| `actor_type` | The type of user/actor that triggered the IssueOps command. Values can be `User` or `Bot` |
 
 ## Allowlist 👩‍🔬
 
