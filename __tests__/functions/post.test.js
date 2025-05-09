@@ -97,3 +97,33 @@ test('throws an error', async () => {
     expect(setFailedMock).toHaveBeenCalledWith('test error')
   }
 })
+
+test('use reaction specified in input on success', async () => {
+  const reactionInput = {
+    status: 'success',
+    success_reaction: 'rocket'
+  }
+  jest.spyOn(core, 'getInput').mockImplementation(name => {
+    return reactionInput[name]
+  })
+  const postReactionsMock = jest.spyOn(postReactions, 'postReactions')
+
+  expect(await post()).toBeUndefined()
+  expect(postReactionsMock).toHaveBeenCalled()
+  expect(postReactionsMock.mock.calls[0][2]).toBe('rocket')
+})
+
+test('use reaction specified in input on failure', async () => {
+  const reactionInput = {
+    status: 'failure',
+    failure_reaction: 'confused'
+  }
+  jest.spyOn(core, 'getInput').mockImplementation(name => {
+    return reactionInput[name]
+  })
+  const postReactionsMock = jest.spyOn(postReactions, 'postReactions')
+
+  expect(await post()).toBeUndefined()
+  expect(postReactionsMock).toHaveBeenCalled()
+  expect(postReactionsMock.mock.calls[0][2]).toBe('confused')
+})
