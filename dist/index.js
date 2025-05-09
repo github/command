@@ -35087,7 +35087,7 @@ async function post() {
     if (success) {
       reaction = core.getInput('success_reaction') || post_thumbsUp
     } else {
-      reaction = core.getInput('failed_reaction') || post_thumbsDown
+      reaction = core.getInput('failure_reaction') || post_thumbsDown
     }
 
     // Update the reactions on the command comment
