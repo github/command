@@ -106,6 +106,6 @@ outputs:
   base_ref:
     description: The base ref that the pull request is merging into (if available and run in the context of a pull request)
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
   post: "dist/index.js"
