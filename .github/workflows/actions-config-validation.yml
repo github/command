@@ -14,10 +14,10 @@ jobs:
   actions-config-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: actions-config-validation
-        uses: GrantBirki/json-yaml-validate@9bbaa8474e3af4e91f25eda8ac194fdc30564d96 # pin@v4.0.0
+        uses: GrantBirki/json-yaml-validate@9dbc6e6ff950c53200156e8afbc16ef1355f1c8d # pin@v5.0.1
         with:
           comment: "true" # enable comment mode
           yaml_schema: "__tests__/schemas/action.schema.yml"
