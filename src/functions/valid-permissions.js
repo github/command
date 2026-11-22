@@ -26,14 +26,22 @@ export async function validPermissions(octokit, context) {
     return `Permission check returns non-200 status: ${permissionRes.status}`
   }
 
-  // Check to ensure the user has at least write permission on the repo
+  // Check to ensure the user has a configured role or base permission on the repo
   const actorPermission = permissionRes.data.permission
-  if (!validPermissionsArray.includes(actorPermission)) {
+  const actorRole = permissionRes.data.role_name
+  const hasValidPermission =
+    validPermissionsArray.includes(actorPermission) ||
+    (actorRole && validPermissionsArray.includes(actorRole))
+  if (!hasValidPermission) {
+    const displayedPermission =
+      actorRole && actorRole !== actorPermission
+        ? `${actorRole} (base permission: ${actorPermission})`
+        : actorPermission
     return `👋 __${
       context.actor
     }__, seems as if you have not ${validPermissionsArray.join(
       '/'
-    )} permissions in this repo, permissions: ${actorPermission}`
+    )} permissions in this repo, permissions: ${displayedPermission}`
   }
 
   // Return true if the user has permissions

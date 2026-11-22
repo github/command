@@ -33,7 +33,7 @@ inputs:
     required: true
     default: "pull_request"
   permissions:
-    description: 'The allowed GitHub permissions an actor can have to invoke IssueOps commands - Example: "write,admin"'
+    description: 'A comma separated list of allowed GitHub full role names or legacy base permissions - Example: "maintain,admin"'
     required: true
     default: "write,admin"
   allow_drafts:
